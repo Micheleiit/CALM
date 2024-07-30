@@ -1,0 +1,1 @@
+In questo codice viene testato il protocollo SPI in cui il SAMD21 funziona come master. In particolare viene fatto un echo dei dati del master per capire come viene strutturato il dato trasmesso verso un potenziale slave.

@@ -1,0 +1,125 @@
+function [] = parse_gcode()
+    
+    fid = fopen('iiit.gcode');
+    %fid = fopen('dr_tondeur.ngc');
+    fid = fopen('cuore.ngc');
+    x = [];
+    y = [];
+    speed = [];
+    while(~feof(fid))
+        
+        line = fgetl(fid);  % read line excluding newline character
+        if(length(line) > 10)
+            
+            if(strcmp(line(1:3),'G00')  )
+                C = strsplit(line);
+                x_string = C{2};
+                
+                if(strcmp(x_string(1),'X'))
+                    x = [x, str2double(x_string(2:end))];
+                    y_string = C{3};
+                    y = [y, str2double(y_string(2:end))];
+                    speed = [speed 1];
+                end
+            end
+            
+            if(strcmp(line(1:3),'G01'))
+                C = strsplit(line);
+                x_string = C{2};
+                
+                if(strcmp(x_string(1),'X'))
+                    x = [x, str2double(x_string(2:end))];
+                    y_string = C{3};
+                    y = [y, str2double(y_string(2:end))];
+                    speed = [speed 0];
+                end
+            end
+            
+            if(strcmp(line(1:3),'G02') || strcmp(line(1:3),'A03'))
+                C = strsplit(line);
+                
+                x_string = C{2};
+                x_end = str2double(x_string(2:end))
+                
+                y_string = C{3};
+                y_end = str2double(y_string(2:end))
+                
+                x_string = C{5};
+                x_center = str2double(x_string(2:end))
+                
+                y_string = C{6};
+                y_center = str2double(y_string(2:end))
+                
+                [x_new, y_new] = rotation(x(end), y(end), x_end, y_end, x(end)+ x_center, y(end) + y_center)
+                
+                x = [x, x_new];
+                y = [y, y_new];
+                speed = [speed 0];
+                
+            end
+        end
+    end
+    
+    
+    
+    
+    x = x-mean(x);
+    y = y-mean(y);
+    
+    plot_path(x,y,speed);
+end
+
+
+function [x, y] = rotation(x_start, y_start, x_end, y_end, x_center, y_center)
+    rad = sqrt((x_start- x_center)^2 + (y_start- y_center)^2);
+    rad2 = sqrt((x_end- x_center)^2 + (y_end- y_center)^2);
+    hold on
+    scatter(x_start, y_start, 'b');
+    scatter(x_end, y_end, 'r');
+    scatter(x_center, y_center, 'g');
+    
+    angle_start = -acosd((x_start- x_center)./rad)
+    
+    
+    
+    x_interp = x_center + rad* cosd(angle_start-5 );
+    y_interp = y_center + rad* sind(angle_start-5 );
+    
+    dist_to_start = sqrt((x_interp- x_start)^2 + (y_interp- y_start)^2)
+    dist_end_to_start = sqrt((x_end- x_start)^2 + (y_end- y_start)^2)
+    
+    if(dist_to_start > dist_end_to_start)
+        x = x_end;
+        y = y_end;
+    else
+        [x_next, y_next] = rotation(x_interp, y_interp, x_end, y_end, x_center, y_center);
+        x = [x_interp, x_next];
+        y = [y_interp, y_next];
+    end
+end
+
+function [x, y] = plot_path(x, y, speed)
+    
+    x = x(1:length(x)-1);
+    y = y(1:length(y)-1);
+    speed = speed(1:length(speed)-1);
+    
+    figure
+    hold on
+    for k= 2:(length(x)-1)
+        if(speed(k+1) == 0)
+            plot([x(k) x(k+1)], [y(k) y(k+1)], 'k');
+        end
+        if(speed(k+1) == 1)
+            plot([x(k) x(k+1)], [y(k) y(k+1)], 'k--');
+        end
+    end
+end
+
+function angle = cos_quadrants(dx, dy)
+    if(dx > 0 && dy > 0)
+        angle = asind(dy)
+    end
+    else if (dx < 0 && dy < 0)
+            angle = 
+end

@@ -1,0 +1,1 @@
+Questo codice serve per abilitare l'alimentazione sulla porta USB così da avere il pennino correttamente alimentato. Inoltre muovendo il pennino sulla tavoletta è possibile notare come il LED VERDE si illumina per dare un feedback visivo.

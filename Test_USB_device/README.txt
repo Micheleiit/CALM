@@ -1,0 +1,1 @@
+Questo codice serve per testrare la possibilità di memorizzare i dati del movimento del pennino sulla tavoletta. I led sulla board si illuminano a seconda che avvengano movimenti lungo X o Y o che tali movimenti vengano effettuati premendo i tasti sul pennino (DRAG).
