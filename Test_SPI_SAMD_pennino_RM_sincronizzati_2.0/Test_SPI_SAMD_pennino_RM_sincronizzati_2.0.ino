@@ -11,7 +11,7 @@
 /* Valore inviato dal RM57 quando entra nello stato PenInput per iniziare a ricevere i dati del pennino */
 #define TRIGGER_VALUE 100700 // valore esadecimale per 100700 = 0x000188F8   
 
-//#define DEBUG
+#define DEBUG
 /* Macro for debug prints */
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
@@ -444,10 +444,10 @@ void setup() {
   delay(5000); // Un ritardo di 5 secondi viene aggiunto nel setup() per consentire il caricamento del codice prima di inizializzare la gestione USB.
 
   /* Few seconds delay before main program start */
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 30; i++) {
     digitalWrite(BUZZER, !digitalRead(BUZZER));
     digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
-    delay(100);
+    delay(1000);
   }
 
 }
@@ -460,8 +460,9 @@ void loop() {
   
   if(!USBready){
 
-    sendSPIData(); // polling al RM57
     delay(1000);
+
+    sendSPIData(); // polling al RM57
     digitalWrite(BUZZER, !digitalRead(BUZZER));
 
   }else{
