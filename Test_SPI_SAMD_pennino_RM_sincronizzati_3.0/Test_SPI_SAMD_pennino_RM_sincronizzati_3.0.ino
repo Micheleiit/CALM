@@ -31,7 +31,7 @@ void testSPICommunication(); // Funzione per testare la comunicazione SPI
 
 
 /* Variabili SPI */
-SPISettings settings_spi(1000000, MSBFIRST, SPI_MODE1); // Configura la velocità (1 MHz), il formato dei dati (MSBFIRST - Most Significant Bit First) e la modalità SPI (SPI_MODE1).
+SPISettings settings_spi(100000, MSBFIRST, SPI_MODE1); // Configura la velocità (1000000 = 1 MHz or 100000 = 100kHz), il formato dei dati (MSBFIRST - Most Significant Bit First) e la modalità SPI (SPI_MODE1).
 uint16_t rx[4] = {0};
 uint16_t tx[4] = {0};
 
@@ -52,6 +52,7 @@ int32_t pitch_mm = 0;
 /* Varizioni di posizione del mouse*/
 int32_t delta_roll = 0;
 int32_t delta_pitch = 0;
+bool restart = false;
 
 uint8_t motion = 0;
 unsigned long last_time_moved = 0; // Una variabile che memorizza il tempo (in millisecondi) in cui è stato rilevato l'ultimo movimento del mouse
@@ -226,6 +227,8 @@ void mouseReleased() {
       digitalWrite(LED_OK, LOW);
       delay(500);
 
+      restart = true; // azzeramento del pennino
+
       //middleButton = false;
       
     }
@@ -298,9 +301,19 @@ void led_blink() {
 void sendSPIData() {
 
 
-  /* Questi valori vengono calcolati sommando i cambiamenti di posizione del mouse (mouse.getXChange() e mouse.getYChange()) rispetto alla posizione iniziale (initialX e initialY).*/
-  rollTX += (delta_roll * *zoomAmountPtr);    //(delta_roll * zoomAmount); 
-  pitchTX += (delta_pitch * *zoomAmountPtr);  // (delta_pitch * zoomAmount);
+  if(restart){ // azzera i dati se è stato premuto a lungo il middle button
+
+      rollTX = 0;
+      pitchTX = 0;
+      restart = false;
+    
+    }else{
+
+      /* Questi valori vengono calcolati sommando i cambiamenti di posizione del mouse (mouse.getXChange() e mouse.getYChange()) rispetto alla posizione iniziale (initialX e initialY).*/
+      rollTX += (delta_roll * *zoomAmountPtr);    //(delta_roll * zoomAmount); 
+      pitchTX += (delta_pitch * *zoomAmountPtr);  // (delta_pitch * zoomAmount);
+      
+    }
 
   // converto in micrometri
   roll_mm = rollTX*1000/30;
@@ -455,7 +468,7 @@ void setup() {
 
   testSPICommunication(); // Test della comunicazione SPI all'avvio
 
-  delay(2000);
+  //delay(2000);
 
   digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
 
@@ -499,6 +512,7 @@ void testSPICommunication(){
     digitalWrite(IPC_SPI_CS, LOW);
     rx[0] = SPI1.transfer16(tx[0]);
     digitalWrite(IPC_SPI_CS, HIGH);
+    delayMicroseconds(1);
     SPI1.endTransaction();
 
     #ifdef DEBUG
@@ -513,6 +527,9 @@ void testSPICommunication(){
     // Controlla se la risposta è quella attesa (adatta a seconda della tua configurazione)
 
     if (rx[0] == 0x5555){ // Supponiamo 0x5555 = 21845 sia la risposta attesa per confermare lo stato PenInput
+
+      digitalWrite(LED_FAULT, LOW);
+      digitalWrite(LED_OK, !digitalRead(LED_OK));
     
       #ifdef DEBUG
         DEBUG_PRINTLN("");
@@ -520,6 +537,9 @@ void testSPICommunication(){
       #endif
 
     }else if(rx[0] == 0x1111){ // Supponiamo 0x1111 = 4369 sia la risposta attesa per confermare lo stato Init
+
+      digitalWrite(LED_OK, LOW);
+      digitalWrite(LED_FAULT, !digitalRead(LED_FAULT));
 
       #ifdef DEBUG
         /* Print dati ricevuti decodificati in formato decimale */
@@ -530,6 +550,15 @@ void testSPICommunication(){
     }
 
     if(rx[0] == 0x2222){ // Supponiamo 0x2222 = 8738 sia la risposta attesa per iniziare a comunicare con il pennino
+
+      digitalWrite(LED_FAULT, LOW);
+      digitalWrite(LED_OK, LOW);
+      delay(500);
+      digitalWrite(LED_FAULT, HIGH);
+      digitalWrite(LED_OK, HIGH);
+      delay(500);
+      digitalWrite(LED_FAULT, LOW);
+      digitalWrite(LED_OK, LOW);
 
       #ifdef DEBUG
         /* Print dati ricevuti decodificati in formato decimale */
@@ -553,6 +582,9 @@ void testSPICommunication(){
   if (!responseReceived) {
     
     slaveReady = false; // Slave non ha risposto entro il tempo limite
+    
+    digitalWrite(LED_FAULT, LOW);
+    digitalWrite(LED_OK, LOW);
 
     #ifdef DEBUG
       DEBUG_PRINTLN("Slave not responding. Communication failed.");

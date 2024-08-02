@@ -198,7 +198,7 @@ void mouseReleased() {
         case ZOOM_IN:
         *zoomFactorPtr = 2.0; // fisso il fattore di scala a 2X
         case ZOOM_OUT:
-        *zoomFactorPtr = 2.0; //0.5; (// fisso il fattore di scala a 0.5X)
+        *zoomFactorPtr = 2.0; // fisso il fattore di scala a 2X
 
       }
   

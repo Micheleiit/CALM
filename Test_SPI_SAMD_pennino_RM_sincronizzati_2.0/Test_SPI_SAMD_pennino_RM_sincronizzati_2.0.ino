@@ -9,7 +9,7 @@
 #define LOWER_BOUND -25000
 
 /* Valore inviato dal RM57 quando entra nello stato PenInput per iniziare a ricevere i dati del pennino */
-#define TRIGGER_VALUE 100700 // valore esadecimale per 100700 = 0x000188F8   
+#define TRIGGER_VALUE 100400 // valore esadecimale per 100700 = 0x000188F8   
 
 #define DEBUG
 /* Macro for debug prints */
@@ -91,7 +91,7 @@ enum state {
 enum state ZoomState = NORMAL_ZOOM;
 
 //*********************************************************************************************************************************************************************//
-//************************************************************************ DATI RM57 ***********************************************************************************//
+//************************************************************************ DATI RM57 **********************************************************************************//
 //*********************************************************************************************************************************************************************//
 /* Dati decodificati ricevuti */
 int32_t rollRX = 0;
@@ -185,20 +185,48 @@ void mouseReleased() {
 
   if (!mouse.getButton(MIDDLE_BUTTON) && middleButton) {
 
-    if (ZoomState == ZOOM_IN) {
-      *zoomFactorPtr = 2.0; // fisso il fattore di scala a 2X
-    } else if (ZoomState == ZOOM_OUT) {
-      *zoomFactorPtr = 2.0; //0.5; (// fisso il fattore di scala a 0.5X)
+    unsigned long elapsedTime = millis() - lastCenterPressTime;
+    if (elapsedTime <= debounceDelay+100) { // Click rapido
+
+      switch (ZoomState){
+
+        case ZOOM_IN:
+        *zoomFactorPtr = 2.0; // fisso il fattore di scala a 2X
+        break;
+
+        case ZOOM_OUT:
+        *zoomFactorPtr = 2.0; // fisso il fattore di scala a 2X
+        break;
+
+      }
+  
+      // Incrementa il contatore dei click del middleButton
+      middleButtonClickCount++;
+      *zoomFactorPtr *= middleButtonClickCount; // Moltiplico il fattore di scala fissato per una costante (n° click middleButton)
+      //digitalWrite(BUZZER, LOW);
+      
+      //middleButton = false;
+
+    }else{
+      
+      //digitalWrite(BUZZER, LOW);
+      
+      //delay(500);
+      // blink dei led
+      digitalWrite(LED_OK, HIGH);
+      digitalWrite(LED_FAULT, HIGH);
+      delay(500);
+      digitalWrite(LED_FAULT, LOW);
+      delay(500);
+      digitalWrite(LED_OK, LOW);
+      delay(500);
+
+      //middleButton = false;
+      
     }
-    //zoomFactor = constrain(zoomFactor, 0.1, 2.0); // Mantieni zoomFactor nei limiti => dal 5-into click in poi zoomFactor è sempre 2.0
+
     digitalWrite(BUZZER, LOW);
-
-    // Incrementa il contatore dei click del middleButton
-    middleButtonClickCount++;
-    *zoomFactorPtr *= middleButtonClickCount; // Moltiplico il fattore di scala fissato per una costante (n° click middleButton)
-    
     middleButton = false;
-
 
   }
 }
@@ -226,7 +254,7 @@ void adjustZoomAmount() {
 
       // Ripristina lo zoom normale
       *zoomAmountPtr = 1.0; 
-      *zoomFactorPtr = 1.0; // 0.0
+      *zoomFactorPtr = 1.0; 
 
       break; 
 
@@ -238,7 +266,7 @@ void adjustZoomAmount() {
 
     case ZOOM_OUT:
 
-        *zoomAmountPtr = 1.0 / zoomFactor; // zoomFactor
+        *zoomAmountPtr = 1.0 / zoomFactor; 
         digitalWrite(LED_FAULT, HIGH);
 
       break;
@@ -441,13 +469,13 @@ void setup() {
   pinMode(nENUSBV, OUTPUT);
   digitalWrite(nENUSBV, LOW); // Enable USB power (Active low)
 
-  delay(5000); // Un ritardo di 5 secondi viene aggiunto nel setup() per consentire il caricamento del codice prima di inizializzare la gestione USB.
+  //delay(5000); // Un ritardo di 5 secondi viene aggiunto nel setup() per consentire il caricamento del codice prima di inizializzare la gestione USB.
 
   /* Few seconds delay before main program start */
-  for (int i = 0; i < 30; i++) {
+  for (int i = 0; i < 80; i++) {
     digitalWrite(BUZZER, !digitalRead(BUZZER));
     digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
-    delay(1000);
+    delay(500);
   }
 
 }
@@ -460,7 +488,7 @@ void loop() {
   
   if(!USBready){
 
-    delay(1000);
+    //delay(1000);
 
     sendSPIData(); // polling al RM57
     digitalWrite(BUZZER, !digitalRead(BUZZER));
