@@ -43,7 +43,8 @@ struct PenMotionStruct
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initPenMotionStruct(PenMotionStruct* penmotionst);
+void initPenMotionStruct(PenMotionStruct* penMotionStruct); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
+
 /**************************************************************************************************************************************/
 
 #endif /* PEN_MOTION_H */

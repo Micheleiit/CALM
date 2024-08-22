@@ -43,7 +43,8 @@ struct ButtonStruct
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initButtonStruct(ButtonStruct* buttonst);
+void initButtonStruct(ButtonStruct* buttonStruct); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
+
 
 /**************************************************************************************************************************************/
 

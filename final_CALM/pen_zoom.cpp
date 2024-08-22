@@ -7,10 +7,11 @@
 */
 #include "pen_zoom.h"
 
-void initZoomStruct(ZoomStruct* zoomst){
-  zoomst->zoomAmount = 0;
-  zoomst->zoomFactor = 0;
 
- zoomst->zoom_state = NORMAL_ZOOM;
+void initZoomStruct(ZoomStruct* zoomStruct){
+  zoomStruct->zoomAmount = 0;
+  zoomStruct->zoomFactor = 0;
+
+ zoomStruct->zoom_state = NORMAL_ZOOM;
  
 }

@@ -8,18 +8,18 @@
 
 #include "pen_motion.h"
 
-void initPenMotionStruct(PenMotionStruct* penmotionst){
+void initPenMotionStruct(PenMotionStruct* penMotionStruct){
   
-  penmotionst->delta_roll = 0;
-  penmotionst->delta_pitch = 0;
+  penMotionStruct->delta_roll = 0;
+  penMotionStruct->delta_pitch = 0;
 
-  penmotionst->roll_mm = 0;
-  penmotionst->pitch_mm = 0;
-  penmotionst->original_roll_mm = 0;
-  penmotionst->original_pitch_mm = 0;
+  penMotionStruct->roll_mm = 0;
+  penMotionStruct->pitch_mm = 0;
+  penMotionStruct->original_roll_mm = 0;
+  penMotionStruct->original_pitch_mm = 0;
 
-  penmotionst->motion = 0;
-  penmotionst->restart = false;
-  penmotionst->last_time_moved = 0;
+  penMotionStruct->motion = 0;
+  penMotionStruct->restart = false;
+  penMotionStruct->last_time_moved = 0;
   
 }

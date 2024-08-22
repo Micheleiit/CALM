@@ -8,14 +8,14 @@
 
 #include "spi_manager.h"
 
-void initSPI(SPIManager* spi, int csPin, uint32_t spiSpeed){
+void initSPIManager(SPIManager* spiManager, int csPin, uint32_t spiSpeed){
   
-  spi->csPin = csPin;
-  spi->spiSpeed = spiSpeed;
-  spi->spiSettings = SPISettings(spiSpeed, MSBFIRST, SPI_MODE1);
+  spiManager->csPin = csPin;
+  spiManager->spiSpeed = spiSpeed;
+  spiManager->spiSettings = SPISettings(spiSpeed, MSBFIRST, SPI_MODE1); // Configura la velocità (1000000 = 1 MHz or 100000 = 100kHz), il formato dei dati (MSBFIRST - Most Significant Bit First) e la modalità SPI (SPI_MODE1).
 
-  pinMode(spi->csPin, OUTPUT); // SPI Chip Select (SAMD21 funge da master)
-  digitalWrite(spi->csPin, HIGH); // deseleziona lo slave
+  pinMode(spiManager->csPin, OUTPUT); // SPI Chip Select (SAMD21 funge da master)
+  digitalWrite(spiManager->csPin, HIGH); // deseleziona lo slave
   SPI1.begin();
 
 }

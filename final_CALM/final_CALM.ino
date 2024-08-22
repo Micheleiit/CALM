@@ -4,92 +4,98 @@
 * Author: Michele Di Lucchio
 */
 
-/****************************************************************************************************************************************************************
-********************************************************************************* INCLUDE **********************************************************************/
+/**********************************************************************************************************************************************************************************
+******************************************************************************** INCLUDE *****************************************************************************************/
 #include "app.h"
 
-/***************************************************************************************************************************************************************/
+/*********************************************************************************************************************************************************************************/
 
-/****************************************************************************************************************************************************************
-********************************************************************************* MACRO ************************************************************************/
-// Macro for debug prints 
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
-#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
-#else
-#define DEBUG_PRINT(...)
-#endif
+/**********************************************************************************************************************************************************************************
+********************************************************************************* MACRO ******************************************************************************************/
 
-/***************************************************************************************************************************************************************/
+/*********************************************************************************************************************************************************************************/
 
 
-/****************************************************************************************************************************************************************
-********************************************************************************* GLOBAL VARIABLES *************************************************************/
+/**********************************************************************************************************************************************************************************
+********************************************************************************** GLOBAL VARIABLES *******************************************************************************/
 uint16_t rx[4];
 uint16_t tx[4];
 
-AppStruct myapp;
+// dichiarazione istanze/Oggetti delle strutture
 
-/***************************************************************************************************************************************************************/
+SPIManager spiManager; // oggetto configurazione del protocollo SPI
+USBManager usbManager; // oggetto configurazione del protocollo USB
+
+SPIStruct penSpi; // oggetto comunicazione SPI master-sleave
+USBStruct penUsb; // oggetto abilitazione host USB
+
+PenMotionStruct penMotion;
+ZoomStruct zoom;
+ButtonStruct button;
+
+LedBlinkerStruct ledOk;
+LedBlinkerStruct ledFault;
+LedBlinkerStruct ledOnOff;
+LedBlinkerStruct ledRed;
+LedBlinkerStruct ledGreen;
+
+AppStruct myapp; // dichiaro un'istanza della strttura AppStruct => sto creando un OGGETTO che rappresenta la APP del mio sistema e che conterrà i valori specifici per ogni campo della struttura APP
+
+/*********************************************************************************************************************************************************************************/
 
 void setup() {
 
-  /************************************* SET-UP SAMD PINS ***************************************/
-  
-  pinMode(LED_ON_OFF_SWITCH, OUTPUT); // (led verde button - serve per segnalare l'invio di dati)
-  pinMode(LED_USER_RED, OUTPUT); // (led rosso sotto - serve per segnalare avviamento codice)
-  pinMode(LED_USER_GREEN, OUTPUT); // (led verde sotto - serve per segnalare l'invio di dati)
-  pinMode(LED_OK, OUTPUT); // (led rosso frontale - serve per segnalere i movimenti lungo X)
-  pinMode(LED_FAULT, OUTPUT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
-  pinMode(BUZZER, OUTPUT);
+  /********************************************************************************* INIZIALIZZAZIONE MODULI *********************************************************************/
+  initSPIManager(&spiManager, IPC_SPI_CS, 100000); 
+  initUSBManager(&usbManager);
 
-  digitalWrite(LED_OK, LOW);
-  digitalWrite(LED_FAULT, LOW);
-  digitalWrite(LED_USER_GREEN, LOW);
-  digitalWrite(LED_USER_RED, LOW);
-  digitalWrite(LED_ON_OFF_SWITCH, LOW);
-  digitalWrite(BUZZER, LOW);
-
-  /********************************* ELENCO DEI MODULI DEL SISTEMA *************************************************/
-
-  ZoomStruct zoom;
-  SPIStruct penSpi;
-  PenMotionStruct penMotion;
-  USBStruct usb;
-  ButtonStruct button;
-  SPIManager spiManager;
-
-  /************************************* INIZIALIZZAZIONE SPI COMUNICATION ***************************/
-  initSPI(&spiManager, IPC_SPI_CS, 100000);
-
-  /*****************************************************************************************/
+  initSPIStruct(&penSpi);
+  initUSBStruct(&penUsb, nENUSBV);
 
   initZoomStruct(&zoom);
-  initSPIStruct(&penSpi);
   initPenMotionStruct(&penMotion);
-  initUSBStruct(&usb);
   initButtonStruct(&button);
 
-  initAppStruct(&myapp, &penMotion, &penSpi, &usb, &zoom, &button, &spiManager); // configuro AppStruct con i puntatori alle strutture di cui sopra
+  initLedBlinkerStruct(&ledOk, LED_OK, 0); // (led rosso frontale - serve per segnalere i movimenti lungo X)
+  initLedBlinkerStruct(&ledFault, LED_FAULT, 0); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
+  initLedBlinkerStruct(&ledOnOff, LED_ON_OFF_SWITCH, 0);
+  initLedBlinkerStruct(&ledRed, LED_USER_RED, 0); // (led rosso sotto - serve per segnalare avviamento codice)
+  initLedBlinkerStruct(&ledGreen, LED_USER_GREEN, 0); // (led verde sotto - serve per segnalare l'invio di dati)
 
-  /************************************* SET-UP USB COMUNICATION ***************************/
-  pinMode(nENUSBV, OUTPUT);
-  digitalWrite(nENUSBV, LOW); // Enable USB power (Active low)
+  initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &button, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen); // inizializzo i puntatori alle strutture di cui sopra
 
-  /********************************* DEBUG *************************************************/
+  /*********************************************************************************************************************************************************************************/
+
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
 
   /********************************* TEST-SPI *************************************************/
   digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
-  //slaveReady = testSPICommunication(settings_spi);
+
+  // Test della comunicazione SPI all'avvio
+  testSPICommunication(&penSpi, &spiManager, 0xAAAA);
+
   digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
+  if(myapp.penSpi->slaveReady){
+
+    // work in progress
+
+  } else {
+
+    // Slave non pronto, accendi il buzzer per indicare errore
+    digitalWrite(BUZZER, HIGH);
+
+    #ifdef DEBUG
+      DEBUG_PRINTLN("");
+      DEBUG_PRINTLN("slaveReady FALSE: Inizializzazione fallita!");
+    #endif
+  }
+
 
 }

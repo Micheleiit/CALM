@@ -3,7 +3,7 @@
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: Settaggio della comunicazione SPI 
+*   Description: Settaggio protocollo di comunicazione SPI 
 */
 
 #ifndef SPI_MANAGER_H
@@ -26,8 +26,8 @@
 struct SPIManager
 {
 
-  int csPin;
-  uint32_t spiSpeed;
+  int csPin;               // pin di selezione per lo slave
+  uint32_t spiSpeed;       // velocità della comunicazione SPI
   SPISettings spiSettings;
   
 };
@@ -36,8 +36,8 @@ struct SPIManager
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initSPI(SPIManager* spi, int csPin, uint32_t spiSpeed);
-//uint16_t spiTransfer(SPIManager* spi, uint16_t data);
+void initSPIManager(SPIManager* spiManager, int csPin, uint32_t spiSpeed);
+//uint16_t spiTransfer(SPIManager* spi, uint16_t data); WORK IN PROGRESS........
 
 /**************************************************************************************************************************************/
 

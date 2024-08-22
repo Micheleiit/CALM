@@ -8,16 +8,16 @@
 
 #include "pen_button.h"
 
-void initButtonStruct(ButtonStruct* buttonst){
+void initButtonStruct(ButtonStruct* buttonStruct){
 
-  buttonst->leftButton = false;
-  buttonst->middleButton = false;
-  buttonst->rightButton = false;
+  buttonStruct->leftButton = false;
+  buttonStruct->middleButton = false;
+  buttonStruct->rightButton = false;
 
-  buttonst->lastRightPressTime = 0;
-  buttonst->lastLeftPressTime = 0;
-  buttonst->lastCenterPressTime = 0;
+  buttonStruct->lastRightPressTime = 0;
+  buttonStruct->lastLeftPressTime = 0;
+  buttonStruct->lastCenterPressTime = 0;
 
-  buttonst->middleButtonClickCount = 0;
+  buttonStruct->middleButtonClickCount = 0;
   
 }

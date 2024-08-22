@@ -1,38 +1,45 @@
 /*
-* pen_usb.h
+* pin_map.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: Genstione del USB host 
+*   Description: Led pins Board SAMD21  
 */
 
-#ifndef PEN_USB_H
-#define PEN_USB_H
+#ifndef LED_H
+#define LED_H
 
 /************************************************************** Define macros *********************************************************/
+
 /**************************************************************************************************************************************/
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
-#include "Arduino.h"
+#include <Arduino.h>
+
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-struct USBStruct
+
+struct LedBlinkerStruct
 {
-  int  usb_pin;
-  bool USBready;
+  int pin;                // pin collegato al LED
+  unsigned long interval; // Intervallo di lampeggio in ms
+  unsigned long lastTime; // ultima volta che il LED è stato acceso/spento
+  bool isOn;              // stato attuale del LED
 };
+
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initUSBStruct(USBStruct* usbStruct, int pin); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
+void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin, unsigned long interval);
+void updateLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct);
 
 /**************************************************************************************************************************************/
 
-#endif /* PEN_USB_H */
+#endif /* LED_H */

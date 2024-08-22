@@ -10,6 +10,15 @@
 #define APPLICATION_H
 
 /************************************************************** Define macros *********************************************************/
+#define DEBUG
+/* Macro for debug prints */
+#ifdef DEBUG
+#define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...)
+#endif
+
 /**************************************************************************************************************************************/
 
 /**************************************************************************************************************************************/
@@ -17,34 +26,51 @@
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
 #include "pin_map.h"
-#include "pen_motion.h"
-#include "pen_spi.h"
+
 #include "spi_manager.h"
-#include "pen_zoom.h"  
+#include "usb_manager.h"
+
+#include "pen_spi.h"
 #include "pen_usb.h"
+
+#include "pen_zoom.h"  
+#include "pen_motion.h"
 #include "pen_button.h"
+#include "led_blinker.h"
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-struct AppStruct
+struct AppStruct // srtuttura complessa che contiene i puntatori alle altre strutture del sistema
 {
-  // Passo i puntatori delle strutture del mio sistema alla struttura AppStruct
-  PenMotionStruct* penMotion;
+
+  SPIManager* spiManager;
+  USBManager* usbManager;
+
   SPIStruct* penSpi;
-  USBStruct* usb;
+  USBStruct* penUsb;
+
+  PenMotionStruct* penMotion;
   ZoomStruct* zoom;
   ButtonStruct* button;
 
-  SPIManager* spiManager;
+  LedBlinkerStruct* ledOk;
+  LedBlinkerStruct* ledFault;
+  LedBlinkerStruct* ledOnOff;
+  LedBlinkerStruct* ledRed;
+  LedBlinkerStruct* ledGreen;
+
 
 };
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initAppStruct(AppStruct* app, PenMotionStruct* app_penMotion, SPIStruct* app_penSpi, USBStruct* app_usb, ZoomStruct* app_zoom, ButtonStruct* app_button, SPIManager* app_spiManager);
+void initAppStruct(AppStruct* app, SPIManager* app_spiManager, USBManager* app_usbManager, SPIStruct* app_penSpi, USBStruct* app_penUsb, 
+                  PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_button, LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault,
+                  LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);
+                
 /**************************************************************************************************************************************/
 
 #endif /* APPLICATION_H */
