@@ -12,42 +12,49 @@
 
 /**********************************************************************************************************************************************************************************
 ********************************************************************************* MACRO ******************************************************************************************/
+#define SPI_SPEED           100000
+#define DATA_SPI_TEST       0xAAAA
+#define ERROR_BLINK_PERIOD  500
 
 /*********************************************************************************************************************************************************************************/
 
 
 /**********************************************************************************************************************************************************************************
-********************************************************************************** GLOBAL VARIABLES *******************************************************************************/
-uint16_t rx[4];
-uint16_t tx[4];
+********************************************************************************* GLOBAL VARIABLES ********************************************************************************/
 
-// dichiarazione istanze/Oggetti delle strutture
+/*dichiarazione istanze delle strutture del sistema. Una istanza di una struttura è un OGGETTO specifico che utilizza il modello definito dalla struttura per contenere dati concreti.
+* Una volta creata un'istanza di una struttura, è possibile accedere ai suoi membri e manipolarli come qualsiasi altra variabile.*/
 
-SPIManager spiManager; // oggetto configurazione del protocollo SPI
-USBManager usbManager; // oggetto configurazione del protocollo USB
+SPIManager spiManager; // oggetto per la configurazione del protocollo SPI
+USBManager usbManager; // oggetto per la configurazione del protocollo USB
 
-SPIStruct penSpi; // oggetto comunicazione SPI master-sleave
-USBStruct penUsb; // oggetto abilitazione host USB
+SPIStruct penSpi; // oggetto per la comunicazione SPI master-sleave
+USBStruct penUsb; // oggetto per l' abilitazione dell' host USB (pennino)
 
 PenMotionStruct penMotion;
 ZoomStruct zoom;
 ButtonStruct button;
 
+// creazione di più istanze di una struttura, ognuna delle quali contiene i propri dati separati
 LedBlinkerStruct ledOk;
 LedBlinkerStruct ledFault;
 LedBlinkerStruct ledOnOff;
 LedBlinkerStruct ledRed;
 LedBlinkerStruct ledGreen;
 
-AppStruct myapp; // dichiaro un'istanza della strttura AppStruct => sto creando un OGGETTO che rappresenta la APP del mio sistema e che conterrà i valori specifici per ogni campo della struttura APP
+AppStruct myapp; // myapp, istanza della struttura AppStruct, rappresenta l'applicazione nel suo complesso raccogliendo tutte le strutture precedenti per gestire l'intero sistema
+
+// SPI related variables
+uint16_t rx[4];
+uint16_t tx[4];
 
 /*********************************************************************************************************************************************************************************/
 
 void setup() {
 
-  /********************************************************************************* INIZIALIZZAZIONE MODULI *********************************************************************/
-  initSPIManager(&spiManager, IPC_SPI_CS, 100000); 
-  initUSBManager(&usbManager);
+  /******************************************************************************* INIZIALIZZAZIONE MODULI ***********************************************************************/
+  initSPIManager(&spiManager, IPC_SPI_CS, SPI_SPEED); // inizializzazione del modulo SPI
+  initUSBManager(&usbManager); // inizializzazione del modulo USB
 
   initSPIStruct(&penSpi);
   initUSBStruct(&penUsb, nENUSBV);
@@ -56,11 +63,11 @@ void setup() {
   initPenMotionStruct(&penMotion);
   initButtonStruct(&button);
 
-  initLedBlinkerStruct(&ledOk, LED_OK, 0); // (led rosso frontale - serve per segnalere i movimenti lungo X)
-  initLedBlinkerStruct(&ledFault, LED_FAULT, 0); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
-  initLedBlinkerStruct(&ledOnOff, LED_ON_OFF_SWITCH, 0);
-  initLedBlinkerStruct(&ledRed, LED_USER_RED, 0); // (led rosso sotto - serve per segnalare avviamento codice)
-  initLedBlinkerStruct(&ledGreen, LED_USER_GREEN, 0); // (led verde sotto - serve per segnalare l'invio di dati)
+  initLedBlinkerStruct(&ledOk, LED_OK); // (led rosso frontale - serve per segnalere i movimenti lungo X)
+  initLedBlinkerStruct(&ledFault, LED_FAULT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
+  initLedBlinkerStruct(&ledOnOff, LED_ON_OFF_SWITCH);
+  initLedBlinkerStruct(&ledRed, LED_USER_RED); // (led rosso sotto - serve per segnalare avviamento codice)
+  initLedBlinkerStruct(&ledGreen, LED_USER_GREEN); // (led verde sotto - serve per segnalare l'invio di dati)
 
   initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &button, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen); // inizializzo i puntatori alle strutture di cui sopra
 
@@ -70,31 +77,28 @@ void setup() {
     Serial.begin(115200);
   #endif
 
-  /********************************* TEST-SPI *************************************************/
   digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
-
-  // Test della comunicazione SPI all'avvio
-  testSPICommunication(&penSpi, &spiManager, 0xAAAA);
-
+  testSPICommunication(&penSpi, &spiManager, DATA_SPI_TEST); // identificazione degli stati dello slave mandando un messaggio di prova
   digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
 
 }
 
 void loop() {
   
-  if(myapp.penSpi->slaveReady){
+  if(myapp.penSpi->slaveReady && myapp.penUsb->USBready){ // slave pronto a processare gli input del pennino
 
-    // work in progress
+    updateUSB(&usbManager); // richiamo la funzione appropriata per eseguire il polling e gestire il dispositivo USB
 
-  } else {
+  } else { // Slave non pronto
 
-    // Slave non pronto, accendi il buzzer per indicare errore
-    digitalWrite(BUZZER, HIGH);
+    //digitalWrite(BUZZER, !digitalRead(BUZZER)); // accendi il buzzer per indicare errore
+    errorSignal(myapp.ledOk, myapp.ledFault, ERROR_BLINK_PERIOD);
 
     #ifdef DEBUG
       DEBUG_PRINTLN("");
       DEBUG_PRINTLN("slaveReady FALSE: Inizializzazione fallita!");
     #endif
+
   }
 
 

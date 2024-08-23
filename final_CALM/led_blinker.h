@@ -27,7 +27,6 @@
 struct LedBlinkerStruct
 {
   int pin;                // pin collegato al LED
-  unsigned long interval; // Intervallo di lampeggio in ms
   unsigned long lastTime; // ultima volta che il LED è stato acceso/spento
   bool isOn;              // stato attuale del LED
 };
@@ -37,8 +36,9 @@ struct LedBlinkerStruct
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin, unsigned long interval);
-void updateLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct);
+void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin);
+void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period);
+void errorSignal(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period);
 
 /**************************************************************************************************************************************/
 

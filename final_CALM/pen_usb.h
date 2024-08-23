@@ -3,7 +3,7 @@
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: Genstione del USB host 
+*   Description: Genstione di aspetti hardware specifici dell'interfaccia USB. Questo modulo si occupa di controllare fisicamente l'alimentazione USB e di monitorare se il modulo USB è pronto per l'uso
 */
 
 #ifndef PEN_USB_H

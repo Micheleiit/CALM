@@ -42,7 +42,7 @@
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-struct AppStruct // srtuttura complessa che contiene i puntatori alle altre strutture del sistema
+struct AppStruct // srtuttura complessa che contiene i puntatori alle altre strutture del sistema che rappresentano diverse funzionalità hardware e software del dispositivo
 {
 
   SPIManager* spiManager;
@@ -62,14 +62,15 @@ struct AppStruct // srtuttura complessa che contiene i puntatori alle altre stru
   LedBlinkerStruct* ledGreen;
 
 
-};
+}; //  Questa struttura complessa consente di accedere facilmente e gestire tutte le componenti dell'applicazione attraverso un'unica struttura.
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
 void initAppStruct(AppStruct* app, SPIManager* app_spiManager, USBManager* app_usbManager, SPIStruct* app_penSpi, USBStruct* app_penUsb, 
-                  PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_button, LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault,
-                  LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);
+PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_button, LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault,
+LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);
+
                 
 /**************************************************************************************************************************************/
 

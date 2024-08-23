@@ -9,9 +9,8 @@
 #include "led_blinker.h"
 
 // Inizializza LedBlinker
-void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin, unsigned long interval){
+void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin){
   ledBlinkerStruct->pin = pin;
-  ledBlinkerStruct->interval = interval;
   ledBlinkerStruct->lastTime = 0;
   ledBlinkerStruct->isOn = false;
 
@@ -20,10 +19,10 @@ void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin, unsigned 
 }
 
 // Aggiorna lo stato del LED in base all'intervallo di lampeggio
-void updateLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct){
+void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period){
   unsigned long currentTime = millis(); // Ottieni il tempo attuale
 
-  if(currentTime - ledBlinkerStruct->lastTime >= ledBlinkerStruct->interval){
+  if(currentTime - ledBlinkerStruct->lastTime >= period){
     ledBlinkerStruct->lastTime = currentTime;
 
     // cambia lo stato del LED
@@ -38,5 +37,24 @@ void updateLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct){
       ledBlinkerStruct->isOn = true;
 
     }
+  }
+}
+
+void errorSignal(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period){
+  unsigned long currentTime = millis(); // Ottieni il tempo attuale una sola volta
+
+  // Aggiorna lo stato di entrambi i LED
+  if(currentTime - ledBlinkerStruct1->lastTime >= period) {
+
+    // Cambia lo stato del primo LED
+    ledBlinkerStruct1->lastTime = currentTime;
+    ledBlinkerStruct1->isOn = !ledBlinkerStruct1->isOn;
+    digitalWrite(ledBlinkerStruct1->pin, ledBlinkerStruct1->isOn ? HIGH : LOW);
+
+    // Cambia lo stato del secondo LED
+    ledBlinkerStruct2->lastTime = currentTime;
+    ledBlinkerStruct2->isOn = !ledBlinkerStruct2->isOn;
+    digitalWrite(ledBlinkerStruct2->pin, ledBlinkerStruct2->isOn ? HIGH : LOW);
+
   }
 }

@@ -3,7 +3,7 @@
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: Gestione comuicazione SPI pennino
+*   Description: Gestione comunicazione di test SPI master-slave
 */
 
 #ifndef PEN_SPI_H
@@ -11,7 +11,7 @@
 
 /************************************************************** Define macros *********************************************************/
 /**************************************************************************************************************************************/
-#define TIMEOUT_DURATION 60000 // Tempo di timeout in millisecondi per la comunicazione SPI
+#define TIMEOUT_DURATION 60000 // Tempo di timeout in millisecondi per la comunicazione di test SPI
 
 #define DEBUG
 /* Macro for debug prints */
@@ -30,19 +30,13 @@
 #include "pin_map.h"
 
 #include "spi_manager.h"
+
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
 struct SPIStruct
 {
-  int32_t rollTX;
-  int32_t pitchTX;
-  int32_t rollRX;
-  int32_t pitchRX;
-
-  unsigned long last_time_spi;
-  
   // variabili per la comunicazione di test
   unsigned long startTime;
   bool responseReceived;
@@ -58,10 +52,6 @@ struct SPIStruct
 void initSPIStruct(SPIStruct* spiStruct); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
 void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t data);
 
-/*
-void sendSPIData();
-void prepareData(int32_t roll, int32_t pitch, uint16_t* txData);
-void decodeData(int32_t* data1, int32_t* data2, uint16_t* rxData);
 /**************************************************************************************************************************************/
 
 #endif /* PEN_SPI_H */

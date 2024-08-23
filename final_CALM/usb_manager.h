@@ -3,7 +3,7 @@
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: Gestione interfaccia USB 
+*   Description: Gestione protocollo USB 
 */
 
 #ifndef USB_MANAGER_H
@@ -26,8 +26,8 @@
 struct USBManager
 {
 
-  USBHost* usbHost; // puntatore all'oggetto USBHost
-  MouseController* mouse; // puntatore all'oggetto MouseController
+  USBHost* usbHost; // puntatore all'oggetto USBHost. che è una classe utilizzata per gestire la comunicazione USB dal lato host. Il USBHost è responsabile dell'inizializzazione e del controllo della comunicazione USB, permettendo al sistema di interagire con dispositivi USB collegati.
+  MouseController* mouse; // puntatore all'oggetto MouseController che è specificamente progettato per gestire l'interfaccia con un dispositivo mouse connesso tramite USB. Il MouseController si basa sul USBHost per eseguire il polling e gestire gli eventi del mouse
   
 };
 
@@ -38,6 +38,10 @@ struct USBManager
 void initUSBManager(USBManager* usbManager);
 void updateUSB(USBManager* usbManager);
 
+// Funzioni di callback per gestire gli eventi del mouse. Sarebbero le funzioni "weak" della libreria MouseController
+void mouseMoved();
+void mousePressed();
+void mouseReleased();
 /**************************************************************************************************************************************/
 
 #endif /* USB_MANAGER_H */

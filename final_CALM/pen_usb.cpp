@@ -19,7 +19,7 @@ MouseController mouse(usb); // MouseController is the class for all calls to the
 void initUSBStruct(USBStruct* usbStruct, int pin){
 
   usbStruct->usb_pin = pin;
-  usbStruct->USBready = false;
+  usbStruct->USBready = true;
 
   pinMode(usbStruct->usb_pin, OUTPUT); 
   digitalWrite(usbStruct->usb_pin, LOW); // Enable USB power (Active low)

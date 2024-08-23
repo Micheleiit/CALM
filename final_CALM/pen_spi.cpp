@@ -11,13 +11,6 @@
 
 void initSPIStruct(SPIStruct* spiStruct){
   
-  spiStruct->rollTX = 0;
-  spiStruct->pitchTX = 0;
-  spiStruct->rollRX = 0;
-  spiStruct->pitchRX = 0;
-
-  spiStruct->last_time_spi = 0;
-
   // variabili per la comunicazione di test
   spiStruct->startTime = 0;
   spiStruct->responseReceived = false;
@@ -25,11 +18,10 @@ void initSPIStruct(SPIStruct* spiStruct){
   spiStruct->rx_test[0] = 0;
   spiStruct->slaveReady = false;
   
-
 }
 
 
-void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t data){ //WORK IN PROGRESS.............
+void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t data){ 
 
   #ifdef DEBUG
     DEBUG_PRINTLN("Avvio comunicazione di test");

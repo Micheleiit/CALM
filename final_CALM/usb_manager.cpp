@@ -18,4 +18,6 @@ void initUSBManager(USBManager* usbManager){
 // Funzione per aggiornare l'interfaccia USB (esegue il polling del mouse)
 void updateUSB(USBManager* usbManager){
   usbManager->usbHost->Task(); // Esegui il task di gestione USB
+  
+  // Le funzioni weak definite nella libreria MouseController saranno chiamate automaticamente
 }
