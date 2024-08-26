@@ -20,11 +20,14 @@
 /**************************************************************************************************************************************/
 #include <Arduino.h>
 
+#include "led_blinker.h"
+#include "usb_manager.h"
+#include "MouseController.h"
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-struct ButtonStruct
+/*struct ButtonStruct
 {
   bool leftButton;
   bool middleButton;
@@ -37,8 +40,15 @@ struct ButtonStruct
   //unsigned long debounceDelay; // Tempo massimo (in ms) tra pressione e rilascio per considerare un "click" rapido
 
   unsigned int middleButtonClickCount; // variabile per contare i click del middleButton
-};
+};*/
 
+struct ButtonStruct
+{
+  bool pressState;
+  unsigned long lastPressTime;
+  unsigned int buttonClickCount; // variabile per contare i click del middleButton
+
+};
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/

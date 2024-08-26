@@ -53,7 +53,11 @@ struct AppStruct // srtuttura complessa che contiene i puntatori alle altre stru
 
   PenMotionStruct* penMotion;
   ZoomStruct* zoom;
-  ButtonStruct* button;
+  
+  //ButtonStruct* button;
+  ButtonStruct* rightButton;
+  ButtonStruct* leftButton;
+  ButtonStruct* middleButton;
 
   LedBlinkerStruct* ledOk;
   LedBlinkerStruct* ledFault;
@@ -67,10 +71,16 @@ struct AppStruct // srtuttura complessa che contiene i puntatori alle altre stru
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-void initAppStruct(AppStruct* app, SPIManager* app_spiManager, USBManager* app_usbManager, SPIStruct* app_penSpi, USBStruct* app_penUsb, 
-PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_button, LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault,
-LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);
 
+/*void initAppStruct(AppStruct* app, SPIManager* app_spiManager, USBManager* app_usbManager, SPIStruct* app_penSpi, USBStruct* app_penUsb, 
+PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_button, LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault,
+LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);*/
+void initAppStruct(AppStruct* app, SPIManager* app_spiManager, USBManager* app_usbManager, SPIStruct* app_penSpi, USBStruct* app_penUsb, 
+PenMotionStruct* app_penMotion, ZoomStruct* app_zoom, ButtonStruct* app_rightButton, ButtonStruct* app_leftButton, ButtonStruct* app_middleButton, 
+LedBlinkerStruct* app_ledOk, LedBlinkerStruct* app_ledFault, LedBlinkerStruct* app_ledOnOff, LedBlinkerStruct* app_ledRed, LedBlinkerStruct* app_ledGreen);
+
+
+void processZoomState(AppStruct* app); // work in progress
                 
 /**************************************************************************************************************************************/
 

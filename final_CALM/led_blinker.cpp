@@ -18,6 +18,12 @@ void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin){
   digitalWrite(ledBlinkerStruct->pin, LOW);
 }
 
+void setLed(LedBlinkerStruct* ledBlinkerStruct, bool value){
+
+  digitalWrite(ledBlinkerStruct->pin, value);
+
+}
+
 // Aggiorna lo stato del LED in base all'intervallo di lampeggio
 void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period){
   unsigned long currentTime = millis(); // Ottieni il tempo attuale
@@ -26,6 +32,10 @@ void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period){
     ledBlinkerStruct->lastTime = currentTime;
 
     // cambia lo stato del LED
+    ledBlinkerStruct->isOn = !ledBlinkerStruct->isOn;
+    digitalWrite(ledBlinkerStruct->pin, ledBlinkerStruct->isOn ? HIGH : LOW);
+
+    /*
     if(ledBlinkerStruct->isOn){
 
       digitalWrite(ledBlinkerStruct->pin, LOW);
@@ -36,10 +46,11 @@ void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period){
       digitalWrite(ledBlinkerStruct->pin, HIGH);
       ledBlinkerStruct->isOn = true;
 
-    }
+    }*/
   }
 }
 
+// Segnala errori nella comunicazione master-slave
 void errorSignal(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period){
   unsigned long currentTime = millis(); // Ottieni il tempo attuale una sola volta
 

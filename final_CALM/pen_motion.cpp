@@ -33,20 +33,22 @@ void initPenMotionStruct(PenMotionStruct* penMotionStruct){
   
 }
 
-
+// Definizione funzioni "weak" movimento mouse
 extern PenMotionStruct penMotion; // extern indica al compilatore che la definizione effettiva della variabile o della funzione si trova in un altro file permettendo al file di riconoscere e accedere a variabili e funzioni definite altrove.
 extern USBManager usbManager; 
 
 void mouseMoved() {
+  
   // Ottieni i cambiamenti di movimento dal MouseController
-  int32_t xChange = usbManager.mouse->getXChange();
-  int32_t yChange = usbManager.mouse->getYChange();
+  int32_t xChange = usbManager.mouse.getXChange();
+  int32_t yChange = usbManager.mouse.getYChange();
 
   // Aggiorna le variabili delta_roll e delta_pitch
   penMotion.delta_roll = xChange;
   penMotion.delta_pitch = yChange;
   penMotion.motion = 1;
 
-  if(penMotion.motion)
-    digitalWrite(LED_OK, HIGH);
+  // debug
+  //if(penMotion.motion)
+    //digitalWrite(LED_OK, HIGH);
 }

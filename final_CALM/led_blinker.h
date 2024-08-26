@@ -37,6 +37,7 @@ struct LedBlinkerStruct
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
 void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin);
+void setLed(LedBlinkerStruct* ledBlinkerStruct, bool value);
 void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period);
 void errorSignal(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period);
 

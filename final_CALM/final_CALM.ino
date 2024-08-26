@@ -8,16 +8,19 @@
 ******************************************************************************** INCLUDE *****************************************************************************************/
 #include "app.h"
 
+
+#include <MouseController.h>
+
+
 /*********************************************************************************************************************************************************************************/
 
 /**********************************************************************************************************************************************************************************
 ********************************************************************************* MACRO ******************************************************************************************/
-#define SPI_SPEED           100000
+#define SPI_SPEED           100000 // Configura la velocità (1000000 = 1 MHz or 100000 = 100kHz)
 #define DATA_SPI_TEST       0xAAAA
-#define ERROR_BLINK_PERIOD  500
+#define ERROR_BLINK_PERIOD  500 // ms
 
 /*********************************************************************************************************************************************************************************/
-
 
 /**********************************************************************************************************************************************************************************
 ********************************************************************************* GLOBAL VARIABLES ********************************************************************************/
@@ -33,14 +36,18 @@ USBStruct penUsb; // oggetto per l' abilitazione dell' host USB (pennino)
 
 PenMotionStruct penMotion;
 ZoomStruct zoom;
-ButtonStruct button;
+
+//ButtonStruct button;
+ButtonStruct rightButton;
+ButtonStruct leftButton;
+ButtonStruct middleButton;
 
 // creazione di più istanze di una struttura, ognuna delle quali contiene i propri dati separati
-LedBlinkerStruct ledOk;
-LedBlinkerStruct ledFault;
-LedBlinkerStruct ledOnOff;
-LedBlinkerStruct ledRed;
-LedBlinkerStruct ledGreen;
+LedBlinkerStruct ledOk; // led giallo frontale
+LedBlinkerStruct ledFault; // led rosso frontale
+LedBlinkerStruct ledOnOff; // led bottone
+LedBlinkerStruct ledRed; // led rosso sotto
+LedBlinkerStruct ledGreen; // led verde sotto
 
 AppStruct myapp; // myapp, istanza della struttura AppStruct, rappresenta l'applicazione nel suo complesso raccogliendo tutte le strutture precedenti per gestire l'intero sistema
 
@@ -61,7 +68,9 @@ void setup() {
 
   initZoomStruct(&zoom);
   initPenMotionStruct(&penMotion);
-  initButtonStruct(&button);
+
+  //initButtonStruct(&button);
+  initButtonStruct(&rightButton);
 
   initLedBlinkerStruct(&ledOk, LED_OK); // (led rosso frontale - serve per segnalere i movimenti lungo X)
   initLedBlinkerStruct(&ledFault, LED_FAULT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
@@ -69,8 +78,9 @@ void setup() {
   initLedBlinkerStruct(&ledRed, LED_USER_RED); // (led rosso sotto - serve per segnalare avviamento codice)
   initLedBlinkerStruct(&ledGreen, LED_USER_GREEN); // (led verde sotto - serve per segnalare l'invio di dati)
 
-  initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &button, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen); // inizializzo i puntatori alle strutture di cui sopra
-
+  //initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &button, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen); // inizializzo i puntatori alle strutture di cui sopra
+  initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &rightButton, &leftButton, &middleButton, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen);
+  
   /*********************************************************************************************************************************************************************************/
 
   #ifdef DEBUG
@@ -87,8 +97,8 @@ void loop() {
   
   if(myapp.penSpi->slaveReady && myapp.penUsb->USBready){ // slave pronto a processare gli input del pennino
 
-    updateUSB(&usbManager); // richiamo la funzione appropriata per eseguire il polling e gestire il dispositivo USB
-
+    updateUSB(myapp.usbManager); // richiamo la funzione per eseguire il polling e gestire il dispositivo USB
+    
   } else { // Slave non pronto
 
     //digitalWrite(BUZZER, !digitalRead(BUZZER)); // accendi il buzzer per indicare errore

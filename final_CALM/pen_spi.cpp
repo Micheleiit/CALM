@@ -52,7 +52,7 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
         DEBUG_PRINT("\n");
       #endif
 
-      if (spiStruct->rx_test[0] == 0x5555) {
+      if (spiStruct->rx_test[0] == PEN_INPUT_STATE) {
 
         digitalWrite(LED_FAULT, LOW);
         digitalWrite(LED_OK, HIGH);
@@ -62,7 +62,7 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
           DEBUG_PRINTLN("PenInput State.");
         #endif
 
-      } else if (spiStruct->rx_test[0] == 0x1111) {
+      } else if (spiStruct->rx_test[0] == INIT_STATE) {
 
           digitalWrite(LED_OK, LOW);
           digitalWrite(LED_FAULT, HIGH);
@@ -72,7 +72,7 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
             DEBUG_PRINTLN("Init state");
           #endif
 
-      } else if (spiStruct->rx_test[0] == 0x2222) {
+      } else if (spiStruct->rx_test[0] == SPI_READY) {
 
         digitalWrite(LED_FAULT, LOW);
         digitalWrite(LED_OK, LOW);

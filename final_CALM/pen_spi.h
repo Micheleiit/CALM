@@ -11,7 +11,10 @@
 
 /************************************************************** Define macros *********************************************************/
 /**************************************************************************************************************************************/
-#define TIMEOUT_DURATION 60000 // Tempo di timeout in millisecondi per la comunicazione di test SPI
+#define TIMEOUT_DURATION 60000  // Tempo di timeout (in millisecondi) entro cui deve essere stabilita la comunicazione di test SPI
+#define INIT_STATE       0x1111 // 4369:  codifica dello stato Init dello slave
+#define PEN_INPUT_STATE  0x5555 // 21845: codifica dello stato PenInput dello slave
+#define SPI_READY        0x2222 // 8738:  codifica stato SpiReady per iniziare la trasmissione dei dati pennino
 
 #define DEBUG
 /* Macro for debug prints */
