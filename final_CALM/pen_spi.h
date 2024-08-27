@@ -15,6 +15,7 @@
 #define INIT_STATE       0x1111 // 4369:  codifica dello stato Init dello slave
 #define PEN_INPUT_STATE  0x5555 // 21845: codifica dello stato PenInput dello slave
 #define SPI_READY        0x2222 // 8738:  codifica stato SpiReady per iniziare la trasmissione dei dati pennino
+#define BLINK 500
 
 #define DEBUG
 /* Macro for debug prints */
@@ -33,7 +34,7 @@
 #include "pin_map.h"
 
 #include "spi_manager.h"
-
+#include "led_blinker.h"
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/

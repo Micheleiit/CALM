@@ -53,8 +53,6 @@ void updateUSB(USBManager* usbManager);
 // Funzioni di callback per gestire gli eventi del mouse. Sarebbero le funzioni "weak" della libreria MouseController. Dichiarandole qui le rendo visibili agli altri file che includono usb_manager.h (tipo pen_motion.h)
 void mouseMoved(); // definita in pen_motion.cpp
 void mousePressed(); // definita in pen_button.cpp
-
-// work in progress
 void mouseReleased(); // definita in pen_zoom.cpp
 /**************************************************************************************************************************************/
 

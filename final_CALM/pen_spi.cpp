@@ -20,6 +20,11 @@ void initSPIStruct(SPIStruct* spiStruct){
   
 }
 
+extern LedBlinkerStruct ledOk; // led giallo frontale
+extern LedBlinkerStruct ledFault; // led rosso frontale
+extern LedBlinkerStruct ledOnOff; // led bottone 
+extern LedBlinkerStruct ledGreen; // led verde sotto 
+extern LedBlinkerStruct ledRed; // led rosso sotto 
 
 void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t data){ 
 
@@ -54,8 +59,8 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
 
       if (spiStruct->rx_test[0] == PEN_INPUT_STATE) {
 
-        digitalWrite(LED_FAULT, LOW);
-        digitalWrite(LED_OK, HIGH);
+        setLed(&ledFault, LOW);
+        setLed(&ledOk, HIGH);
 
         #ifdef DEBUG
           DEBUG_PRINTLN("");
@@ -64,24 +69,18 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
 
       } else if (spiStruct->rx_test[0] == INIT_STATE) {
 
-          digitalWrite(LED_OK, LOW);
-          digitalWrite(LED_FAULT, HIGH);
+        setLed(&ledFault, HIGH);
+        setLed(&ledOk, LOW);
 
-          #ifdef DEBUG
-            DEBUG_PRINTLN("");
-            DEBUG_PRINTLN("Init state");
-          #endif
+        #ifdef DEBUG
+          DEBUG_PRINTLN("");
+          DEBUG_PRINTLN("Init state");
+        #endif
 
       } else if (spiStruct->rx_test[0] == SPI_READY) {
 
-        digitalWrite(LED_FAULT, LOW);
-        digitalWrite(LED_OK, LOW);
-        delay(500);
-        digitalWrite(LED_FAULT, HIGH);
-        digitalWrite(LED_OK, HIGH);
-        delay(500);
-        digitalWrite(LED_FAULT, LOW);
-        digitalWrite(LED_OK, LOW);
+        setLed(&ledFault, LOW);
+        setLed(&ledOk, LOW);
 
         #ifdef DEBUG
           DEBUG_PRINTLN("");
@@ -101,8 +100,8 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
     if (!spiStruct->responseReceived) {
 
       spiStruct->slaveReady = false;
-      digitalWrite(LED_FAULT, LOW);
-      digitalWrite(LED_OK, LOW);
+      setLed(&ledFault, LOW);
+      setLed(&ledOk, LOW);
 
       #ifdef DEBUG
         DEBUG_PRINTLN("Slave not responding. Communication failed.");

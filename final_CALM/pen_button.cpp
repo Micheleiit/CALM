@@ -30,7 +30,7 @@ void initButtonStruct(ButtonStruct* buttonStruct){
   
 }
 
-// Definizione funzioni "weak" bottoni mouse
+/************************************************************************* FUNZIONI WEAK DI MouseController **************************************************************/
 
 extern USBManager usbManager;
 extern LedBlinkerStruct ledOk; // led giallo frontale
@@ -44,20 +44,17 @@ void mousePressed(){
 
   if(usbManager.mouse.getButton(RIGHT_BUTTON) && !rightButton.pressState){
     rightButton.pressState = true;
-    setLed(&ledOk, HIGH);
     rightButton.lastPressTime = millis();
   }
 
   if(usbManager.mouse.getButton(LEFT_BUTTON) && !leftButton.pressState){
     leftButton.pressState = true;
-    setLed(&ledFault, HIGH);
     leftButton.lastPressTime = millis();
 
   }
 
   if(usbManager.mouse.getButton(MIDDLE_BUTTON) && !middleButton.pressState){
     middleButton.pressState = true;
-    setLed(&ledOnOff, HIGH);
     middleButton.lastPressTime = millis();
 
   }

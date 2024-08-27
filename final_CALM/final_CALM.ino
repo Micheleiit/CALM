@@ -51,7 +51,7 @@ LedBlinkerStruct ledGreen; // led verde sotto
 
 AppStruct myapp; // myapp, istanza della struttura AppStruct, rappresenta l'applicazione nel suo complesso raccogliendo tutte le strutture precedenti per gestire l'intero sistema
 
-// SPI related variables
+// motion related variables
 uint16_t rx[4];
 uint16_t tx[4];
 
@@ -71,6 +71,8 @@ void setup() {
 
   //initButtonStruct(&button);
   initButtonStruct(&rightButton);
+  initButtonStruct(&leftButton);
+  initButtonStruct(&middleButton);
 
   initLedBlinkerStruct(&ledOk, LED_OK); // (led rosso frontale - serve per segnalere i movimenti lungo X)
   initLedBlinkerStruct(&ledFault, LED_FAULT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
@@ -87,9 +89,9 @@ void setup() {
     Serial.begin(115200);
   #endif
 
-  digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
+  //digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
   testSPICommunication(&penSpi, &spiManager, DATA_SPI_TEST); // identificazione degli stati dello slave mandando un messaggio di prova
-  digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
+  //digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
 
 }
 

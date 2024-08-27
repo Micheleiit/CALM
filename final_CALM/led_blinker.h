@@ -38,8 +38,11 @@ struct LedBlinkerStruct
 /**************************************************************************************************************************************/
 void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin);
 void setLed(LedBlinkerStruct* ledBlinkerStruct, bool value);
-void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long period);
 void errorSignal(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period);
+void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long blinkPeriod, int blinkCount);
+void doubleLedBlink(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long blinkPeriod, int blinkCount);
+
+
 
 /**************************************************************************************************************************************/
 
