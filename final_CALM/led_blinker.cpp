@@ -22,7 +22,7 @@ void setLed(LedBlinkerStruct* ledBlinkerStruct, bool value){
 
   digitalWrite(ledBlinkerStruct->pin, value);
 
-  value ? ledBlinkerStruct->isOn = true : ledBlinkerStruct->isOn = false; 
+  value ? ledBlinkerStruct->isOn = true : ledBlinkerStruct->isOn = false; // (condizione) ? (valore_se_vero) : (valore_se_falso);
 
 }
 

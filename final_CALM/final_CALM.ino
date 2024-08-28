@@ -9,9 +9,6 @@
 #include "app.h"
 
 
-#include <MouseController.h>
-
-
 /*********************************************************************************************************************************************************************************/
 
 /**********************************************************************************************************************************************************************************
@@ -55,6 +52,8 @@ AppStruct myapp; // myapp, istanza della struttura AppStruct, rappresenta l'appl
 uint16_t rx[4];
 uint16_t tx[4];
 
+float zoomScale = 1; // fattore che serve per regolare lo zoom in modo RELATIVO
+
 /*********************************************************************************************************************************************************************************/
 
 void setup() {
@@ -74,6 +73,10 @@ void setup() {
   initButtonStruct(&leftButton);
   initButtonStruct(&middleButton);
 
+  // Inizializzazione Buzzer
+  pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, LOW);
+
   initLedBlinkerStruct(&ledOk, LED_OK); // (led rosso frontale - serve per segnalere i movimenti lungo X)
   initLedBlinkerStruct(&ledFault, LED_FAULT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
   initLedBlinkerStruct(&ledOnOff, LED_ON_OFF_SWITCH);
@@ -89,9 +92,7 @@ void setup() {
     Serial.begin(115200);
   #endif
 
-  //digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
   testSPICommunication(&penSpi, &spiManager, DATA_SPI_TEST); // identificazione degli stati dello slave mandando un messaggio di prova
-  //digitalWrite(LED_USER_RED, !digitalRead(LED_USER_RED));
 
 }
 

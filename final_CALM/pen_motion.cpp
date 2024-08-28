@@ -45,32 +45,34 @@ void initPenMotionStruct(PenMotionStruct* penMotionStruct){
 
 void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
 
-  switch(zoom.zoom_state) {
+  /*switch(zoom.zoom_state) {
 
     case NORMAL_ZOOM:
 
       zoom.zoomAmount = 1.0;
-      zoom.zoomFactor = 1.0;
-      setLed(&ledOnOff, HIGH);
       
     break;
 
     case ZOOM_IN:
 
       zoom.zoomAmount = zoom.zoomFactor;
-      //setLed(&ledOnOff, LOW);
-      //setLed(&ledOk, HIGH);
 
     break;
 
     case ZOOM_OUT:
 
-      zoom.zoomAmount = 1.0/zoom.zoomFactor;
-      //setLed(&ledOnOff, LOW);
-      //setLed(&ledFault, HIGH);
+      zoom.zoomAmount = zoom.zoomFactor; //1.0/zoom.zoomFactor;
 
     break;
 
+  }*/
+  
+  // Riscrittura del blocco switch con if e operatore ternario
+  if (zoom.zoom_state == NORMAL_ZOOM) {
+      zoom.zoomAmount = 1.0;
+      setLed(&ledOnOff, HIGH);
+  } else {
+      zoom.zoomAmount = (zoom.zoom_state == ZOOM_IN || zoom.zoom_state == ZOOM_OUT) ? zoom.zoomFactor : zoom.zoomAmount;
   }
 
   if(penMotionStruct->restart) { // azzera i dati se è stato premuto a lungo il middle button
@@ -131,16 +133,17 @@ void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
 
   // Controlla se i valori originali erano fuori range
   if (original_roll_mm > UPPER_BOUND || original_roll_mm < LOWER_BOUND || original_pitch_mm > UPPER_BOUND || original_pitch_mm < LOWER_BOUND) {
+    
     // Attiva il buzzer se i valori sono fuori range
     digitalWrite(BUZZER, HIGH);
-    //buzzerActive = true;
+
   }else{
 
     // Spegni il buzzer se i valori sono all'interno del range
     if (BUZZER) {
       digitalWrite(BUZZER, LOW);
-      //buzzerActive = false;
     }
+
   }
 
 }
@@ -153,8 +156,8 @@ void prepareSPIData(int32_t roll, int32_t pitch, uint16_t* txData){
   txData[3] = (int16_t) (0x4000 | ((pitch & 0xFFF000) >> 12));      // PITCH MSB -> txData[3] = 0x4XXX
 }
 
-/*void decodeSPIData(int32_t data1, int32_t data2, uint16_t* rxData){
-
+// FUNZIONE CHE PERMETTEREBBE DI SFRUTTARE I DATI TRASMESSI DALLO SLAVE VERSO IL MASTER: NON UTILIZZATA IN QUESTA VERSIONE DEL FIRMWARE
+/*void decodeSPIData(int32_t data1, int32_t data2, uint16_t* rxData){ 
   data1 = 0;
   data2 = 0;
   data1 |= (0xFFF & rxData[0]);                // Keep only the received 12 lsb (payload) and set them as bits from 0 to 11

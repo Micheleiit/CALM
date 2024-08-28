@@ -51,7 +51,7 @@ struct ZoomStruct
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
 void initZoomStruct(ZoomStruct* zoomStruct); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
-
+void updateZoomState(ZoomState state);
 /**************************************************************************************************************************************/
 
 #endif /* PEN_ZOOM_H */

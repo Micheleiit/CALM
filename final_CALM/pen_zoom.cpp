@@ -22,13 +22,44 @@ extern ButtonStruct middleButton;
 
 extern PenMotionStruct penMotion;
 
+extern float zoomScale;
+
 void initZoomStruct(ZoomStruct* zoomStruct){
 
   zoomStruct->zoomAmount = 0;
-  zoomStruct->zoomFactor = 0;
+  zoomStruct->zoomFactor = 1.0;
 
   zoomStruct->zoom_state = NORMAL_ZOOM;
  
+}
+
+void updateZoomState(ZoomState state){
+  switch (state) {
+
+    case ZOOM_IN:
+
+      setLed(&ledOk, HIGH);    // Accendi il LED giallo per ZOOM_IN
+      setLed(&ledOnOff, LOW);  // Spegni il LED verde
+      setLed(&ledFault, LOW);    // Spegni il LED rosso
+
+    break;
+
+    case ZOOM_OUT:
+
+      setLed(&ledFault, HIGH);   // Accendi il LED rosso per ZOOM_OUT
+      setLed(&ledOnOff, LOW);  // Spegni il LED verde
+      setLed(&ledOk, LOW);     // Spegni il LED giallo
+
+    break;
+
+    case NORMAL_ZOOM:
+
+      setLed(&ledOnOff, HIGH); // Accendi il LED verde per NORMAL_ZOOM
+      setLed(&ledOk, LOW);     // Spegni il LED giallo
+      setLed(&ledFault, LOW);    // Spegni il LED rosso
+
+    break;
+  }
 }
 
 /************************************************************************* FUNZIONI WEAK DI MouseController **************************************************************/
@@ -43,18 +74,22 @@ void mouseReleased(){
     if (elapsedTime <= DEBOUNCE_DELAY) { // Click rapido
       
       zoom.zoom_state = ZOOM_IN;
-      digitalWrite(LED_OK, HIGH);
+      zoom.zoomFactor = ZOOM_IN_FACTOR; // fisso il fattore di scala a 2X
+
+      middleButton.buttonClickCount = 1; //0; // Reset del contatore dei click del middleButton ogni vota che passo da uno stato all'altro
+      zoomScale *= ZOOM_IN_FACTOR * middleButton.buttonClickCount; 
+      zoom.zoomFactor = zoomScale; //*= middleButton.buttonClickCount;
 
     }else{
 
       zoom.zoom_state = NORMAL_ZOOM;
-      digitalWrite(LED_OK, LOW);
-      
       
     }
 
-    middleButton.buttonClickCount = 0; // Reset del contatore dei click del middleButton ogni vota che passo da uno stato all'altro
     rightButton.pressState = false;
+
+    updateZoomState(zoom.zoom_state);
+
   }
 
   if (!usbManager.mouse.getButton(LEFT_BUTTON) && leftButton.pressState) {
@@ -64,17 +99,22 @@ void mouseReleased(){
     if (elapsedTime <= DEBOUNCE_DELAY) { // Click rapido
       
       zoom.zoom_state = ZOOM_OUT;
-      digitalWrite(LED_FAULT, HIGH);
+      zoom.zoomFactor = ZOOM_OUT_FACTOR; // fisso il fattore di scala a 2X
+
+      middleButton.buttonClickCount = 1; //0; // Reset del contatore dei click del middleButton ogni vota che passo da uno stato all'altro
+      zoomScale *= 1.0/ZOOM_OUT_FACTOR * middleButton.buttonClickCount; 
+      zoom.zoomFactor = zoomScale; //*= middleButton.buttonClickCount;
       
     }else{
 
       zoom.zoom_state = NORMAL_ZOOM;
-      digitalWrite(LED_FAULT, LOW);
     
     }
 
-    middleButton.buttonClickCount = 0; // Reset del contatore dei click del middleButton ogni vota che passo da uno stato all'altro
     leftButton.pressState = false;
+
+    updateZoomState(zoom.zoom_state);
+
   }
 
   if (!usbManager.mouse.getButton(MIDDLE_BUTTON) && middleButton.pressState) {
@@ -85,25 +125,31 @@ void mouseReleased(){
       switch (zoom.zoom_state){
 
         case ZOOM_IN:
-        zoom.zoomFactor = ZOOM_IN_FACTOR; // fisso il fattore di scala a 2X
+
+          middleButton.buttonClickCount++;
+          zoom.zoomFactor *= middleButton.buttonClickCount; // Moltiplico il fattore di scala fissato per una costante (n° click middleButton)
+
         break;
 
         case ZOOM_OUT:
-        zoom.zoomFactor = ZOOM_OUT_FACTOR; // fisso il fattore di scala a 2X
+        
+          middleButton.buttonClickCount++;
+          zoom.zoomFactor *= middleButton.buttonClickCount; // Moltiplico il fattore di scala fissato per una costante (n° click middleButton)
+
+        break;
+
+        default:
+
+          zoom.zoomFactor = 1.0;
+
         break;
 
       }
-  
-      // Incrementa il contatore dei click del middleButton
-      //digitalWrite(BUZZER, HIGH);
-
-      middleButton.buttonClickCount++;
-      zoom.zoomFactor *= middleButton.buttonClickCount; // Moltiplico il fattore di scala fissato per una costante (n° click middleButton)
 
     }else{
 
       // blink dei led sotto
-      doubleLedBlink(&ledRed, &ledGreen, BLINK_PERIOD, 3);
+      doubleLedBlink(&ledRed, &ledGreen, BLINK_PERIOD, 2);
   
       penMotion.restart = true; // azzeramento del pennino
       
