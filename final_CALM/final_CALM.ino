@@ -52,8 +52,6 @@ AppStruct myapp; // myapp, istanza della struttura AppStruct, rappresenta l'appl
 uint16_t rx[4];
 uint16_t tx[4];
 
-float zoomScale = 1; // fattore che serve per regolare lo zoom in modo RELATIVO
-
 /*********************************************************************************************************************************************************************************/
 
 void setup() {

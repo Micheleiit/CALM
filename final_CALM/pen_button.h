@@ -46,7 +46,7 @@ struct ButtonStruct
 {
   bool pressState;
   unsigned long lastPressTime;
-  unsigned int buttonClickCount; // variabile per contare i click del middleButton
+  float buttonClickCount; // variabile per contare i click (questa variabile è usata dentro la funzione pow per questo il suo tipo deve essere float)
 
 };
 /**************************************************************************************************************************************/

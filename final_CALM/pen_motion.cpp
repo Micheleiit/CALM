@@ -18,6 +18,7 @@ extern LedBlinkerStruct ledOnOff; // led bottone
 
 extern ZoomStruct zoom;
 
+
 extern uint16_t rx[4];
 extern uint16_t tx[4]; 
 
@@ -45,40 +46,19 @@ void initPenMotionStruct(PenMotionStruct* penMotionStruct){
 
 void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
 
-  /*switch(zoom.zoom_state) {
+  if(penMotionStruct->restart) { 
 
-    case NORMAL_ZOOM:
+    // invia il comando per settare la posizione (0,0) e azzera i dati se è stato premuto velocmente il middle button
 
-      zoom.zoomAmount = 1.0;
-      
-    break;
-
-    case ZOOM_IN:
-
-      zoom.zoomAmount = zoom.zoomFactor;
-
-    break;
-
-    case ZOOM_OUT:
-
-      zoom.zoomAmount = zoom.zoomFactor; //1.0/zoom.zoomFactor;
-
-    break;
-
-  }*/
-  
-  // Riscrittura del blocco switch con if e operatore ternario
-  if (zoom.zoom_state == NORMAL_ZOOM) {
-      zoom.zoomAmount = 1.0;
-      setLed(&ledOnOff, HIGH);
-  } else {
-      zoom.zoomAmount = (zoom.zoom_state == ZOOM_IN || zoom.zoom_state == ZOOM_OUT) ? zoom.zoomFactor : zoom.zoomAmount;
-  }
-
-  if(penMotionStruct->restart) { // azzera i dati se è stato premuto a lungo il middle button
+    SPI1.beginTransaction(spiManager->spiSettings);
+    digitalWrite(spiManager->csPin, LOW);  // Seleziona lo slave
+    penMotionStruct->rollRX = SPI1.transfer16(DATA_SPI_STARTING_POINT);
+    digitalWrite(spiManager->csPin, HIGH); // Deseleziona lo slave
+    SPI1.endTransaction();                 // Termina la transazione SPI  
 
     penMotionStruct->rollTX = 0;
     penMotionStruct->pitchTX = 0;
+
     penMotionStruct->restart = false;
   
   } else {
@@ -95,9 +75,9 @@ void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
   int32_t original_roll_mm = penMotionStruct->roll_mm ;
   int32_t original_pitch_mm = penMotionStruct->pitch_mm;
 
-  // limito il range degli spostamenti
+  /* limito il range degli spostamenti
   penMotionStruct->roll_mm = constrain(penMotionStruct->roll_mm, LOWER_BOUND, UPPER_BOUND);
-  penMotionStruct->pitch_mm = constrain(penMotionStruct->pitch_mm, LOWER_BOUND, UPPER_BOUND);
+  penMotionStruct->pitch_mm = constrain(penMotionStruct->pitch_mm, LOWER_BOUND, UPPER_BOUND);*/
 
   // Resetto i dati ricevuti 
   rx[0] = 0;
@@ -131,6 +111,7 @@ void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
 
   //decodeSPIData(penMotionStruct->rollRX, penMotionStruct->pitchRX, rx);
 
+  /*
   // Controlla se i valori originali erano fuori range
   if (original_roll_mm > UPPER_BOUND || original_roll_mm < LOWER_BOUND || original_pitch_mm > UPPER_BOUND || original_pitch_mm < LOWER_BOUND) {
     
@@ -144,7 +125,7 @@ void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
       digitalWrite(BUZZER, LOW);
     }
 
-  }
+  }*/
 
 }
 
