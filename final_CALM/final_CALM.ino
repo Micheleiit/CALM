@@ -66,7 +66,6 @@ void setup() {
   initZoomStruct(&zoom);
   initPenMotionStruct(&penMotion);
 
-  //initButtonStruct(&button);
   initButtonStruct(&rightButton);
   initButtonStruct(&leftButton);
   initButtonStruct(&middleButton);
@@ -81,7 +80,6 @@ void setup() {
   initLedBlinkerStruct(&ledRed, LED_USER_RED); // (led rosso sotto - serve per segnalare avviamento codice)
   initLedBlinkerStruct(&ledGreen, LED_USER_GREEN); // (led verde sotto - serve per segnalare l'invio di dati)
 
-  //initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &button, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen); // inizializzo i puntatori alle strutture di cui sopra
   initAppStruct(&myapp, &spiManager, &usbManager, &penSpi, &penUsb, &penMotion, &zoom, &rightButton, &leftButton, &middleButton, &ledOk, &ledFault, &ledOnOff, &ledRed, &ledGreen);
   
   /*********************************************************************************************************************************************************************************/
@@ -90,7 +88,7 @@ void setup() {
     Serial.begin(115200);
   #endif
 
-  testSPICommunication(&penSpi, &spiManager, DATA_SPI_TEST); // identificazione degli stati dello slave mandando un messaggio di prova
+  testSPICommunication(&penSpi, &spiManager, DATA_SPI_TEST); // identificazione degli stati dello slave mandando un messaggio di test
 
 }
 

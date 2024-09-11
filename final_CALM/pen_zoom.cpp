@@ -5,6 +5,7 @@
 *   Author: Michele Di Lucchio
 *    
 */
+
 #include "pen_zoom.h"
 
 extern USBManager usbManager;
@@ -75,6 +76,8 @@ void mouseReleased() {
             zoom.zoom_state_new = ZOOM_IN;
             zoom.zoom_state_old = zoom.zoom_state_new;
             rightButton.buttonClickCount = 1;
+            setLed(&ledOnOff, HIGH);
+            setLed(&ledRed, LOW);
           }
 
         break;
@@ -84,6 +87,8 @@ void mouseReleased() {
           zoom.zoomFactor_new = constrain(ZOOM_IN_FACTOR + rightButton.buttonClickCount, 2, 4); // constrain(pow(ZOOM_IN_FACTOR, rightButton.buttonClickCount), 2, 4);
           zoom.zoomFactor_old = zoom.zoomFactor_new;
           zoom.zoomAmount = zoom.zoomFactor_new;
+          setLed(&ledOnOff, LOW);
+          setLed(&ledRed, HIGH);
           
         break;
       }
@@ -141,6 +146,8 @@ void mouseReleased() {
             zoom.zoom_state_new = ZOOM_OUT;
             zoom.zoom_state_old = zoom.zoom_state_new;
             leftButton.buttonClickCount = 1;
+            setLed(&ledGreen, LOW); // LED VERDE DI SOTTO
+            setLed(&ledOnOff, HIGH);
           }
 
         break;
@@ -150,6 +157,8 @@ void mouseReleased() {
           zoom.zoomFactor_new = 1.0/(constrain(ZOOM_OUT_FACTOR + leftButton.buttonClickCount, 2, 4)); //constrain(pow(ZOOM_OUT_FACTOR, rightButton.buttonClickCount), 2, 4);
           zoom.zoomFactor_old = zoom.zoomFactor_new;
           zoom.zoomAmount = zoom.zoomFactor_new;
+          setLed(&ledGreen, HIGH); // LED VERDE DI SOTTO
+          setLed(&ledOnOff, LOW);
         
         break;
 

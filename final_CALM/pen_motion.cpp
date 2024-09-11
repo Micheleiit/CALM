@@ -11,12 +11,14 @@
 extern PenMotionStruct penMotion; // extern indica al compilatore che la definizione effettiva della variabile o della funzione si trova in un altro file permettendo al file di riconoscere e accedere a variabili e funzioni definite altrove.
 extern USBManager usbManager; 
 extern SPIManager spiManager;
+extern ZoomStruct zoom;
 
+/*
 extern LedBlinkerStruct ledOk; // led giallo frontale
 extern LedBlinkerStruct ledFault; // led rosso frontale
 extern LedBlinkerStruct ledOnOff; // led bottone 
+*/
 
-extern ZoomStruct zoom;
 
 
 extern uint16_t rx[4];
@@ -48,23 +50,25 @@ void sendSPIData(PenMotionStruct* penMotionStruct, SPIManager* spiManager){
 
   if(penMotionStruct->restart) { 
 
-    // invia il comando per settare la posizione (0,0) e azzera i dati se è stato premuto velocmente il middle button
+    // se è stato premuto velocmente il middle button invia il comando per settare la posizione (0,0) nel punto del workspace scelto dall'operatore 
 
     SPI1.beginTransaction(spiManager->spiSettings);
-    digitalWrite(spiManager->csPin, LOW);  // Seleziona lo slave
+    digitalWrite(spiManager->csPin, LOW);                                 // Seleziona lo slave
     penMotionStruct->rollRX = SPI1.transfer16(DATA_SPI_STARTING_POINT);
-    digitalWrite(spiManager->csPin, HIGH); // Deseleziona lo slave
-    SPI1.endTransaction();                 // Termina la transazione SPI  
+    digitalWrite(spiManager->csPin, HIGH);                                // Deseleziona lo slave
+    SPI1.endTransaction();                                                // Termina la transazione SPI  
 
     penMotionStruct->rollTX = 0;
     penMotionStruct->pitchTX = 0;
+
+    //enableLedBlink(&ledFault, 500, 4);// Segnala che è stata settata la posizione (0,0) -> questo da probelmi al laser
 
     penMotionStruct->restart = false;
   
   } else {
 
     penMotionStruct->rollTX += (penMotionStruct->delta_roll * zoom.zoomAmount);
-    penMotionStruct->pitchTX += (penMotionStruct->delta_pitch * zoom.zoomAmount);
+    penMotionStruct->pitchTX += (penMotionStruct->delta_pitch * zoom.zoomAmount);  
 
   }
 

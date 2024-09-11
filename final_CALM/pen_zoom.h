@@ -31,24 +31,14 @@
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-enum ZoomState {
+enum ZoomState { // Definisce un tipo di dato enumerato chiamato ZoomState, che rappresenta i possibili stati di zoom in cui il sistema può trovarsi. Ogni stato ha un nome descrittivo
 
   NORMAL_ZOOM = 0,
   ZOOM_IN = 1,
   ZOOM_OUT = 2,
-
-  //
-  UNDEFINED = 4
+  UNDEFINED = 3
 
 };
-
-/*struct ZoomStruct
-{
-  float zoomAmount; // rappresenta il livello di zoom normale senza ingrandimenti o riduzioni.
-  float zoomFactor;
-
-  ZoomState zoom_state; // zoom_state una variabile di tipo ZoomState che tiene traccia dello stato di zoom del sistema
-};*/
 
 struct ZoomStruct
 {

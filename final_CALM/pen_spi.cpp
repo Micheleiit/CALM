@@ -112,18 +112,3 @@ void testSPICommunication(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t
 
   }
 }
-
-//
-void setStartingPoint(SPIStruct* spiStruct, SPIManager* spiManager, uint16_t data){
-  
-  spiStruct->startTime = millis();
-  spiStruct->responseReceived = false;
-  spiStruct->tx_test[0] = data; // Comando per identificare gli stati del sistema prima dell'avvio
-
-  SPI1.beginTransaction(spiManager->spiSettings);
-  digitalWrite(spiManager->csPin, LOW);  // Seleziona lo slave
-  spiStruct->rx_test[0] = SPI1.transfer16(spiStruct->tx_test[0]);
-  digitalWrite(spiManager->csPin, HIGH); // Deseleziona lo slave
-  SPI1.endTransaction();                 // Termina la transazione SPI  
-
-}
