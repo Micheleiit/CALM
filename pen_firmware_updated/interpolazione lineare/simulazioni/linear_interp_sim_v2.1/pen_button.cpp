@@ -119,7 +119,7 @@ void mouseReleased() {
 
     unsigned long elapsedTime = millis() - leftButton.PressTime;
 
-    if (elapsedTime <= DEBOUNCE_DELAY) { // Click rapido per ZOOM_IN
+    if (elapsedTime <= DEBOUNCE_DELAY) {
       
       leftButton.button = CLICKED; // Click rapido
 
@@ -136,8 +136,8 @@ void mouseReleased() {
       
       if(current_state == RECORDING) {
         
-        //traj_record->current_index = traj_record->current_index_record; //Synchronize the reading with the last writing: serve a garantire che la riproduzione della traiettoria inizi dall'ultimo punto registrato
-        traj_record->current_index = (sizeof(traj_record->pos_x)/sizeof(traj_record->pos_x[0]));
+        traj_record->current_index = traj_record->current_index_record; //Synchronize the reading with the last writing: serve a garantire che la riproduzione della traiettoria inizi dall'ultimo punto registrato
+        
         current_state = DRAW_RECORD;
 
       }

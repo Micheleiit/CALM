@@ -8,6 +8,11 @@
 
 #include "trajectory.h"
 
+extern LedBlinkerStruct ledGreen; // led verde sotto
+
+extern int currentIteration;
+
+
 // Definizione del puntatore globale alla struttura trajectory_calm
 trajectory_calm* traj_record = NULL;  // Inizializza il puntatore globale a NULL: non punta a nessun blocco di memoria
 
@@ -31,6 +36,13 @@ trajectory_calm* init_trajectory_struct()
 
     traj_record->current_distance = 0;
 
+    // Inizializza i vettori delle coordinate double (pos_x_double, pos_y_double)
+    memset(traj_record->pos_x_double, 0, sizeof(traj_record->pos_x_double));
+    memset(traj_record->pos_y_double, 0, sizeof(traj_record->pos_y_double));
+
+    // Inizializza i valori degli indici (index_values)
+    memset(traj_record->index_values, 0, sizeof(traj_record->index_values));
+
     return traj_record; // Restituisce il puntatore alla struttura inizializzata
 
   } else {
@@ -47,23 +59,54 @@ trajectory_calm* init_trajectory_struct()
 Record the trajectory. Stops recording when the structure is full.
 Also computes the distance covered, for not displaying the result if this distance is too small.
 */
-void record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32_t y_to_be_recorded)
+boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32_t y_to_be_recorded, int32_t min_distance)
 {
-  if (traj->current_index_record < TRAJECTORY_MAX_SIZE) // controllo curciale per evitare overflow 
-  {
-    traj->pos_x[traj->current_index_record] = x_to_be_recorded;
-    traj->pos_y[traj->current_index_record] = y_to_be_recorded;
+  if (traj->current_index_record < TRAJECTORY_MAX_SIZE) { // controllo per evitare overflow
+      
+    // Se ci sono già punti registrati, controlla la distanza rispetto all'ultimo nodo
+    if (traj->current_index_record > 0) {
 
-    if (traj->current_index_record > 0) // se ci sono già punti registrati
-      // sommo la distanza euclidea fra due punti registrati successivi: somma dei quadrati delle differenze tra le coordinate x e y del punto corrente e del punto precedente
-      traj->total_distance += sqrt(pow2(x_to_be_recorded - traj->pos_x[traj->current_index_record - 1]) + pow2(y_to_be_recorded - traj->pos_y[traj->current_index_record - 1]));
+      // Calcola la distanza euclidea tra il nuovo punto e l'ultimo nodo registrato
+      int32_t dx = x_to_be_recorded - traj->pos_x_double[traj->current_index_record - 1];
+      int32_t dy = y_to_be_recorded - traj->pos_y_double[traj->current_index_record - 1];
+      int32_t dist = sqrt(pow2(dx) + pow2(dy));
 
+      // Se la distanza è inferiore a min_distance, non registrare il punto
+      if (dist < min_distance) {
+        return false;
+      }
+    }
+
+    // Se la distanza è sufficiente, memorizza il nuovo nodo
+    traj->pos_x_double[traj->current_index_record] = static_cast<double>(x_to_be_recorded); // Conversione dei valori di x in double
+    traj->pos_y_double[traj->current_index_record] = static_cast<double>(y_to_be_recorded); // Conversione dei valori di y in double
+
+    // Calcola la distanza totale (solo se ci sono già punti registrati)
+    if (traj->current_index_record > 0) {
+      traj->total_distance += sqrt(pow2(x_to_be_recorded - traj->pos_x_double[traj->current_index_record - 1]) + 
+                                    pow2(y_to_be_recorded - traj->pos_y_double[traj->current_index_record - 1]));
+    }
+
+    // Registra l'indice
+    traj->index_values[traj->current_index_record] = traj->current_index_record;
+
+    // Aggiorna gli indici
     traj->current_index_record += 1;
-    traj->current_size += 1;
+    traj->current_size += 1; // aggiorna la dimensione del vettore
 
-  }else{
-    // implementare un avviso: ad esempio mandando un messaggio a RM57
+    // Incrementa il contatore delle iterazioni
+    Serial.print("iteration:");
+    Serial.print(currentIteration);
+    Serial.println(", ");
+
+    currentIteration += 1;
+
+  } else {
+    setLed(&ledGreen, !ledGreen.isOn); // Indicazione di overflow della traiettoria
   }
+
+  return true;
+  
 }
 
 // ***********************************************************
@@ -90,21 +133,23 @@ When go_back is asserted, it switches in the direction of the most recent point.
 
 void read_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y, boolean go_back)
 {
-  if (traj->current_index >= traj->current_size) // se si è raggiunta la fine della traiettoria
+  if (traj->current_index >= traj->current_size -1) // se si è raggiunta la fine della traiettoria
   {
     traj->current_direction = - 1;
-    traj->current_index--;// += - 1;
-    traj->current_distance = 0;
+    //traj->current_index += - 1;
+    //traj->current_distance = 0;
+    Serial.println("back");
   }
   else if (traj->current_index == 0 || go_back) // cambia direnzione di scorrimento del vettore in cui è salvata la traiettoria registrata
   {
     traj->current_direction = 1;
-    traj->current_distance = 0;
+    //traj->current_distance = 0;
+    Serial.println("forward");
   }
   
   // assegno le coordinate del punto corrente alle variabili puntate da x e y
-  *x = traj->pos_x[traj->current_index];
-  *y = traj->pos_y[traj->current_index];
+  *x = traj->pos_x_double[traj->current_index];
+  *y = traj->pos_y_double[traj->current_index];
 
   traj->current_index += traj->current_direction; // aggiorno l'indice corrente in base alla direzione attuale
 }
@@ -112,12 +157,6 @@ void read_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y, boolean go_b
 // ***********************************************************
 // *********** INTERPOLA LA TRAIETTORIA REGISTRATA ***********
 // ***********************************************************
-/*
-Interpolates the trajectory for covering it at constant speed.
-Scanning length:
-0: Normal operation
->0: Only covers the specified distance in ticks, at the end of the trajectory.
-*/
 boolean read_trajectory_cst_speed(trajectory_calm* traj, int32_t* x, int32_t* y, uint32_t speed_ref, uint16_t scanning_length)
 {
   uint32_t dist = 0; // distanza fra il punto corrente e il punto successivo
@@ -140,6 +179,10 @@ boolean read_trajectory_cst_speed(trajectory_calm* traj, int32_t* x, int32_t* y,
     {
       // se siamo alla prima iterazione => chiamiamo read_trajectory() per leggere il primo punto obiettivo lungo la traiettoria
       read_trajectory(traj, &traj->x_towards, &traj->y_towards, go_back);
+      Serial.print("prima_lettura_x_toward:");
+      Serial.print(traj->x_towards);
+      Serial.print(",prima_lettura_y_toward:");
+      Serial.println(traj->y_towards);
     }
 
     dist = sqrt((float) (pow2(traj->x_towards - *x) + pow2(traj->y_towards - *y)));
@@ -150,6 +193,21 @@ boolean read_trajectory_cst_speed(trajectory_calm* traj, int32_t* x, int32_t* y,
       read_trajectory(traj, &traj->x_towards, &traj->y_towards, go_back);
       dist = sqrt((float) (pow2(traj->x_towards - *x) + pow2(traj->y_towards - *y)));
     }
+
+    Serial.print("x:");
+    Serial.print(*x);
+    Serial.print(",x_tow:");
+    Serial.print(traj->x_towards);
+    Serial.print(",y");
+    Serial.print(*y);
+    Serial.print(",y_tow:");
+    Serial.println(traj->y_towards);
+    
+    
+    Serial.print("dist:");
+    Serial.print(dist);
+    Serial.print(",step_dist:");
+    Serial.println(step_dist);
 
     // Go forward, with the specified step distance
     *x = *x + step_dist / dist * (traj->x_towards - *x);
