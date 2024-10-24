@@ -80,6 +80,15 @@ void reinit_trajectory(trajectory_calm* traj)
   traj->total_distance = 0;
 }
 
+
+void cleanup_trajectory() {
+
+  if (traj_record != NULL) {
+    free(traj_record);  // Libera la memoria dinamica allocata per la traiettoria
+    traj_record = NULL; // Previene l'uso accidentale di un puntatore non valido
+  }
+
+}
 // ***********************************************************
 // *********** LETTURA DELLA TRAIETTORIA REGISTRATA **********
 // ***********************************************************

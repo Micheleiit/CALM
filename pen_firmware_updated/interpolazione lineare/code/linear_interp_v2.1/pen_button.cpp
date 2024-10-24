@@ -125,8 +125,14 @@ void mouseReleased() {
 
       if(current_state == DRAW_RECORD){
 
-        reinit_trajectory(traj_record);
+        //reinit_trajectory(traj_record);
+        cleanup_trajectory();
+
         current_state = FREE_HAND;
+        
+        if (traj_record == NULL) {
+          traj_record = init_trajectory_struct();  // Rialloca memoria se è stata liberata
+        }
         
       }
 

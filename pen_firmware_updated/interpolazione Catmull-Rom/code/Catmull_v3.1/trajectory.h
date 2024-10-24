@@ -56,8 +56,10 @@ typedef struct trajectory_calm
 trajectory_calm* init_trajectory_struct();
 boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32_t y_to_be_recorded, int32_t min_distance);
 void reinit_trajectory(trajectory_calm* traj);
+void cleanup_trajectory();
 boolean read_and_interp_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y, double query_points_dist);
 int32_t pow2(int32_t input);
+
 
 // Dichiarazione del puntatore traj_record come variabile globale accessibile da altri file .cpp
 extern trajectory_calm* traj_record;

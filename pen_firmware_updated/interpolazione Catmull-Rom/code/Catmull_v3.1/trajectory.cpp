@@ -97,6 +97,10 @@ boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32
   
 }
 
+int32_t pow2(int32_t input)
+{
+  return input * input;
+}
 
 // ***********************************************************
 // ********** REINIZIALIZZAZIONE DELLA TRAIETTORIA  **********
@@ -109,6 +113,14 @@ void reinit_trajectory(trajectory_calm* traj)
   traj->total_distance = 0;
 }
 
+void cleanup_trajectory() {
+
+  if (traj_record != NULL) {
+    free(traj_record);  // Libera la memoria dinamica allocata per la traiettoria
+    traj_record = NULL; // Previene l'uso accidentale di un puntatore non valido
+  }
+
+}
 
 // ***********************************************************
 // *********** INTERPOLA LA TRAIETTORIA REGISTRATA ***********
@@ -158,9 +170,4 @@ boolean read_and_interp_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y
     return false; // Non ci sono abbastanza dati per procedere
   }
   return true;
-}
-
-int32_t pow2(int32_t input)
-{
-  return input * input;
 }

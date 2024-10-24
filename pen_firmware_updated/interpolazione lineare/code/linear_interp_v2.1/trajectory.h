@@ -56,6 +56,7 @@ typedef struct trajectory_calm
 trajectory_calm* init_trajectory_struct();
 boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32_t y_to_be_recorded, int32_t min_distance);
 void reinit_trajectory(trajectory_calm* traj);
+void cleanup_trajectory();
 void read_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y, boolean go_back);
 boolean read_trajectory_cst_speed(trajectory_calm* traj, int32_t* x, int32_t* y, uint32_t speed_ref, uint16_t scanning_length);
 
