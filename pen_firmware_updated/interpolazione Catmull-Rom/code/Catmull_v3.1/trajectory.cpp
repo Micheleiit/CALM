@@ -8,7 +8,7 @@
 
 #include "trajectory.h"
 
-extern LedBlinkerStruct ledGreen; // led verde sotto
+extern LedBlinkerStruct ledOnOff; // led verde sotto
 
 
 // Definizione del puntatore globale alla struttura trajectory_calm
@@ -89,12 +89,15 @@ boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32
     traj->current_index_record += 1;
     traj->current_size += 1; // aggiorna la dimensione del vettore
 
+    return true;
+
   } else {
-    setLed(&ledGreen, !ledGreen.isOn); // Indicazione di overflow della traiettoria
+    
+    current_state = OVERFLOW_TRAJ; // setLed(&ledGreen, !ledGreen.isOn); // Indicazione di overflow della traiettoria
+    return false;
+    
   }
 
-  return true;
-  
 }
 
 int32_t pow2(int32_t input)

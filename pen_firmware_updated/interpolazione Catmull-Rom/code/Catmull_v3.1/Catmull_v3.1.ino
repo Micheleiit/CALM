@@ -152,7 +152,7 @@ void loop() {
 
   if(current_state != ERROR){ // Manipolatore pronto a processare gli input del pennino
     
-    if(current_state == FREE_HAND || current_state == RECORDING){
+    if(current_state == ZERO_POINT || current_state == FREE_HAND || current_state == RECORDING){
       
       /* Richiamo la funzione per eseguire il polling e gestire il dispositivo USB. In this case, 
       the position is send only when there is an input from the mouse, not at 1kHz.*/
@@ -162,7 +162,7 @@ void loop() {
     } else if(current_state == DRAW_RECORD){
 
       /* In this case, the position is send at 1kHz ovvero ogni 1ms.*/
-      if (millis_prev + STREAMING_PERIOD_ms  <= millis()){
+      if (millis_prev + STREAMING_PERIOD_ms <= millis()){
         
         millis_prev = millis();
 

@@ -136,6 +136,12 @@ void mouseReleased() {
         
       }
 
+      if(current_state == FREE_HAND){
+        
+        current_state = ZERO_POINT;
+        
+      }
+
     } else {
 
       leftButton.button = LONG_PRESSED; // Pressione lunga

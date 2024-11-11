@@ -143,22 +143,23 @@ void handlePenMotionAndSendSPI(SPIStruct* spiStruct){
       spiStruct->rollTX += spiStruct->delta_roll;
       spiStruct->pitchTX += spiStruct->delta_pitch;
       
-      deleteOutliers(&penSpi);
+      deleteNoise(&penSpi);
       
       if(current_state == RECORDING){
         // qui il flag send_coordinate non ha alcuna utilità rispetto alla versione simulata del codice.
-        send_coordinate = record_trajectory(traj_record, spiStruct->rollTX, spiStruct->pitchTX, MIN_EUCLID_DIST);     
+        send_coordinate = record_trajectory(traj_record, spiStruct->rollTX, spiStruct->pitchTX, MIN_EUCLID_DIST/SCALING_MOUSE);     
       }
     
     break;
 
     case DRAW_RECORD:
 
+      query_points_dist = (static_cast<double>(traj_record->current_size)/TIME_DIST) * STREAMING_PERIOD_ms;
       abort_sequence = !read_and_interp_trajectory(traj_record, &spiStruct->rollTX, &spiStruct->pitchTX, query_points_dist);
       
     break;  
 
-    case ZERO_POINT: // per ora non utilizziamo mai questo stato
+    case ZERO_POINT: 
 
       spiStruct->rollTX = 0;
       spiStruct->pitchTX = 0;
@@ -198,6 +199,16 @@ void checkCurrentState(){
       ledBlink(&ledOnOff, &ledFault, BLINK_PERIOD);
     break;
 
+    case OVERFLOW_TRAJ:
+      ledBlink(&ledGreen, &ledOnOff, BLINK_PERIOD); // Indicazione di overflow della traiettoria
+      setLed(&ledFault, false);
+    break;
+
+    case ZERO_POINT:
+      setLed(&ledOnOff, false);
+      setLed(&ledFault, false);
+    break;
+
   }
   
 }
@@ -207,14 +218,17 @@ void checkCurrentState(){
 void mouseMoved() {
 
   // Ottieni i cambiamenti di movimento dal MouseController
-  int32_t xChange_micro = (usbManager.mouse.getXChange())*1000/30; // restituisce la variazione dell'asse X del mouse rispetto alla sua posizione precedente
-  int32_t yChange_micro = (usbManager.mouse.getYChange())*1000/30; // restituisce la variazione dell'asse Y del mouse rispetto alla sua posizione precedente
+  int32_t xChange_micro = (usbManager.mouse.getXChange()) * 1000/38; // restituisce la variazione dell'asse X del mouse rispetto alla sua posizione precedente
+  int32_t yChange_micro = (usbManager.mouse.getYChange()) * 1000/38; // restituisce la variazione dell'asse Y del mouse rispetto alla sua posizione precedente
 
   //Aggiorna le variabili delta_roll e delta_pitch
-  penSpi.delta_roll = (xChange_micro * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
-  penSpi.delta_pitch = (yChange_micro * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
+  penSpi.delta_roll = -(xChange_micro * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
+  penSpi.delta_pitch = -(yChange_micro * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
 
-  handlePenMotionAndSendSPI(&penSpi);
+  if(current_state != DRAW_RECORD){
+    handlePenMotionAndSendSPI(&penSpi);
+  }
+  
 }
 
 void mouseDragged(){
@@ -244,22 +258,96 @@ void send_to_manipulator(SPIManager* spiManager){
       digitalWrite(spiManager->csPin, LOW);                                 // Seleziona lo slave
       SPI1.transfer16(DATA_ZERO_POINT);
       digitalWrite(spiManager->csPin, HIGH);                                // Deseleziona lo slave
-      SPI1.endTransaction();
+      //SPI1.endTransaction();
+
+      //
+      delayMicroseconds(1);
+
+      for(int i = 0; i < sizeof(tx) / sizeof(tx[0]); i++){ // Itera sul numero di elementi del vettore tx
+
+        digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
+        SPI1.transfer16(tx[i]);           // Transfer block:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
+        digitalWrite(spiManager->csPin, HIGH);    // Deseleziona lo slave
+        delayMicroseconds(1);
+      }
+
+      SPI1.endTransaction(); 
+
+    break;
+
+    case RECORDING:
+
+      if(send_coordinate){
+
+        SPI1.beginTransaction(spiManager->spiSettings);
+
+        for(int i = 0; i < sizeof(tx) / sizeof(tx[0]); i++){ // Itera sul numero di elementi del vettore tx
+
+          digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
+          rx[i] = SPI1.transfer16(tx[i]);           // Transfer block:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
+          digitalWrite(spiManager->csPin, HIGH);    // Deseleziona lo slave
+          delayMicroseconds(1);
+        }
+
+        /*digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
+        rx[0] = SPI1.transfer16(tx[0]);           // Transfer block 1:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
+        digitalWrite(spiManager->csPin, HIGH);    // Deseleziona lo slave
+        delayMicroseconds(1);
+
+        digitalWrite(spiManager->csPin, LOW);
+        rx[1] = SPI1.transfer16(tx[1]);           // Transfer block 2
+        digitalWrite(spiManager->csPin, HIGH);
+        delayMicroseconds(1);
+
+        digitalWrite(spiManager->csPin, LOW);
+        rx[2] = SPI1.transfer16(tx[2]);           // Transfer block 3
+        digitalWrite(spiManager->csPin, HIGH);
+        delayMicroseconds(1);
+
+        digitalWrite(spiManager->csPin, LOW);
+        rx[3] = SPI1.transfer16(tx[3]);           // Transfer block 4
+        digitalWrite(spiManager->csPin, HIGH);*/
+
+        SPI1.endTransaction();
+      }
+
     break;
 
     default:
 
       SPI1.beginTransaction(spiManager->spiSettings);
 
-      for(int i = 0; i < sizeof(tx) / sizeof(tx[0]); i++){ // Itera sul numero di elementi del vettore tx
+        for(int i = 0; i < sizeof(tx) / sizeof(tx[0]); i++){ // Itera sul numero di elementi del vettore tx
 
-        digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
-        rx[i] = SPI1.transfer16(tx[i]);           // Transfer block:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
+          digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
+          rx[i] = SPI1.transfer16(tx[i]);           // Transfer block:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
+          digitalWrite(spiManager->csPin, HIGH);    // Deseleziona lo slave
+          delayMicroseconds(1);
+        }
+
+        /*digitalWrite(spiManager->csPin, LOW);     // Seleziona lo slave
+        rx[0] = SPI1.transfer16(tx[0]);           // Transfer block 1:  Trasmette un blocco di 16 bit e riceve un blocco di 16 bit simultaneamente
         digitalWrite(spiManager->csPin, HIGH);    // Deseleziona lo slave
         delayMicroseconds(1);
-      }
 
-      SPI1.endTransaction();
+        digitalWrite(spiManager->csPin, LOW);
+        rx[1] = SPI1.transfer16(tx[1]);           // Transfer block 2
+        digitalWrite(spiManager->csPin, HIGH);
+        delayMicroseconds(1);
+
+        digitalWrite(spiManager->csPin, LOW);
+        rx[2] = SPI1.transfer16(tx[2]);           // Transfer block 3
+        digitalWrite(spiManager->csPin, HIGH);
+        delayMicroseconds(1);
+
+        digitalWrite(spiManager->csPin, LOW);
+        rx[3] = SPI1.transfer16(tx[3]);           // Transfer block 4
+        digitalWrite(spiManager->csPin, HIGH);*/
+
+        SPI1.endTransaction();
+
+    
+      
   }
 
 }
@@ -272,7 +360,7 @@ void prepareSPIData(int32_t roll, int32_t pitch, uint16_t* txData){
   txData[3] = (int16_t) (0x4000 | ((pitch & 0xFFF000) >> 12));      // PITCH MSB -> txData[3] = 0x4XXX
 }
 
-void deleteOutliers(SPIStruct* spiStruct){
+void deleteNoise(SPIStruct* spiStruct){
   // Aggiungi il nuovo campione al buffer, sovrascrivendo il campione più vecchio
   spiStruct->rollBuffer[spiStruct->bufferIndex] = spiStruct->rollTX;
   spiStruct->pitchBuffer[spiStruct->bufferIndex] = spiStruct->pitchTX;

@@ -19,6 +19,7 @@
 #define SPI_READY             0x2222 // 8738:  codifica stato SpiReady per iniziare la trasmissione dei dati pennino
 #define BLINK_PERIOD          500    // ms
 #define BUFFER_SIZE           10     // filtro a media mobile sugli ultimi 50 samples
+#define TIME_DIST             4000   // in ms e sarebbero 4s, ovvero il tempo che noi vogliamo per l'esecuzione della traiettoria
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
@@ -44,14 +45,14 @@ struct SPIStruct
   // variabili per la fase operativa
   int32_t rollTX;
   int32_t pitchTX;
-  //int32_t rollRX;
-  //int32_t pitchRX;
   int32_t delta_roll; // Spostamento del mouse lungo X
   int32_t delta_pitch; // Spostamento del mouse lungo Y
-    // Buffer per i campioni
+  //int32_t roll_micro;
+  //int32_t pitch_micro;
+  // Buffer per i campioni
   int32_t rollBuffer[BUFFER_SIZE];
   int32_t pitchBuffer[BUFFER_SIZE];
-    // Indice corrente nel buffer
+  // Indice corrente nel buffer
   int bufferIndex;
   int sampleCount;
 };
@@ -66,7 +67,7 @@ void handlePenMotionAndSendSPI(SPIStruct* spiStruct);
 void checkCurrentState();
 void prepareSPIData(int32_t roll, int32_t pitch, uint16_t* txData);
 void send_to_manipulator(SPIManager* spiManager);
-void deleteOutliers(SPIStruct* spiStruct);
+void deleteNoise(SPIStruct* spiStruct);
 /**************************************************************************************************************************************/
 
 #endif /* PEN_SPI_H */

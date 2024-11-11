@@ -15,8 +15,8 @@
 // Limited by the on-board RAM memory (32KB). Could be improved by recording directly the ticks (relative position, 8bits instead of 32)
 // Lasts approx 25 sec
 #define TRAJECTORY_MAX_SIZE 1000 // 2500
-#define STREAMING_PERIOD_ms 1
-#define MIN_EUCLID_DIST 8
+#define STREAMING_PERIOD_ms 4    // 1
+#define MIN_EUCLID_DIST 200      // 8
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
@@ -24,6 +24,7 @@
 #include <Arduino.h>
 #include "InterpolationLib.h"
 #include "led_blinker.h"
+#include "fsm.h" // per accedere a curremt_state
 /**************************************************************************************************************************************/
 
 
