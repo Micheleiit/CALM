@@ -65,7 +65,7 @@ void handlePenMotionAndSendSPI(SPIStruct* spiStruct){
       deleteOutliers(&penSpi);
 
       if(current_state == RECORDING){
-        send_coordinate = record_trajectory(traj_record, spiStruct->rollTX, spiStruct->pitchTX, MIN_EUCLID_DIST);    
+        send_coordinate = record_trajectory(traj_record, spiStruct->rollTX, spiStruct->pitchTX, MIN_EUCLID_DIST/SCALING_MOUSE);    
 
         if(send_coordinate){
 
@@ -78,6 +78,11 @@ void handlePenMotionAndSendSPI(SPIStruct* spiStruct){
     break;
 
     case DRAW_RECORD:
+
+      //
+      query_points_dist = (static_cast<double>(traj_record->current_size)/TIME_DIST) * STREAMING_PERIOD_ms;
+      Serial.print("query_point_dist: ");
+      Serial.println(query_points_dist);
 
       abort_sequence = !read_and_interp_trajectory(traj_record, &spiStruct->rollTX, &spiStruct->pitchTX, query_points_dist);
       
@@ -118,6 +123,11 @@ void checkCurrentState(){
       ledBlink(&ledOnOff, &ledFault, BLINK_PERIOD);
     break;
 
+    case OVERFLOW_TRAJ:
+      ledBlink(&ledGreen, &ledOnOff, BLINK_PERIOD); // Indicazione di overflow della traiettoria
+      setLed(&ledFault, false);
+    break;
+
   }
   
 }
@@ -127,8 +137,8 @@ void checkCurrentState(){
 void mouseMoved(int xChange, int yChange) {
 
   //Aggiorna le variabili delta_roll e delta_pitch
-  penSpi.delta_roll = (xChange * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
-  penSpi.delta_pitch = (yChange * SCALING_MOUSE); // bisognerebbe invertire il segno della coordinata
+  penSpi.delta_roll = (xChange * SCALING_MOUSE)*1000/38; // bisognerebbe invertire il segno della coordinata. Abbiamo convertito in micrometri
+  penSpi.delta_pitch = (yChange * SCALING_MOUSE)*1000/38; // bisognerebbe invertire il segno della coordinata. Abbiamo convertito in micrometri
 
   handlePenMotionAndSendSPI(&penSpi);
 }

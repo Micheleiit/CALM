@@ -1,45 +1,56 @@
 /*
-* fsm.h
+* pen_button.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: macchina a stati finiti del sistema
+*   Description: Gestione bottoni pennino 
 */
 
-#ifndef FSM_H
-#define FSM_H
+#ifndef PEN_BUTTON_H
+#define PEN_BUTTON_H
 
 /************************************************************** Define macros *********************************************************/
+#define DEBOUNCE_DELAY 500 // Tempo massimo (in ms) tra pressione e rilascio per considerare un "click" rapido
+
+// Definisci i limiti minimo e massimo simmetrici rispetto a 1
+#define MIN_SCALING_MOUSE 0.25  // Limite minimo (ad esempio, 1/4)
+#define MAX_SCALING_MOUSE 4.0   // Limite massimo (ad esempio, 4)
 /**************************************************************************************************************************************/
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
+#include <Arduino.h>
+
+#include "led_blinker.h"
+#include "usb_manager.h" // si porta dentro "MouseController.h"
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
+enum ButtonState {
+  NOT_PRESSED,   // Pulsante non premuto
+  PRESSED,       // Pulsante premuto (in attesa di rilascio)
+  CLICKED,       // Pulsante rilasciato dopo un clic rapido
+  LONG_PRESSED   // Pulsante premuto per lungo tempo
+};
 
-enum states {
+struct ButtonStruct
+{
+  ButtonState button;      // stato del pulsante
+  unsigned long PressTime; // tempo di pressione del pulsante
+  float buttonClickCount; // variabile per contare i click (questa variabile è usata dentro la funzione pow per questo il suo tipo deve essere float)
 
-  INITIALIZATION,       // stato 0: fase di inizializzazione del calm
-  ZERO_POINT,           // stato 1: Setta la posizione (0,0) nel punto del workspace scelto dall'operatore
-  FREE_HAND,            // stato 2: Controllo manuale del manipolatore
-  RECORDING,            // stato 3: Registrazione della traiettoria
-  DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
-};       
-
+};
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-// Dichiarazione esterna della variabile globale `current_state`
-extern enum states current_state; //  dico al compilatore che la variabile esiste da qualche altra parte (in un file .cpp), ma può essere utilizzata in tutti i file che includono questo header.
+void initButtonStruct(ButtonStruct* buttonStruct); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
+
+
 /**************************************************************************************************************************************/
 
-#endif /* FSM_H */
+#endif /* PEN_BUTTON_H */

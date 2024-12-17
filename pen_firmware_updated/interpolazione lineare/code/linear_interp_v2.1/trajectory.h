@@ -14,7 +14,7 @@
 
 // Limited by the on-board RAM memory (32KB). Could be improved by recording directly the ticks (relative position, 8bits instead of 32)
 // Lasts approx 25 sec
-#define TRAJECTORY_MAX_SIZE 2500
+#define TRAJECTORY_MAX_SIZE 1000 //2500
 #define STREAMING_PERIOD_ms 1
 #define MIN_EUCLID_DIST 4
 /**************************************************************************************************************************************/

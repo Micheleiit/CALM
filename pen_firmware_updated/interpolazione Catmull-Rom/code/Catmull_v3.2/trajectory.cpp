@@ -10,14 +10,6 @@
 
 extern LedBlinkerStruct ledGreen; // led verde sotto
 
-extern int currentIteration;
-extern int i;
-
-// variabili temporali
-extern unsigned long startTime;       // Variabile per memorizzare il tempo iniziale
-extern unsigned long endTime;         // Variabile per memorizzare il tempo finale
-extern bool flag1;
-extern bool flag2;
 
 // Definizione del puntatore globale alla struttura trajectory_calm
 trajectory_calm* traj_record = NULL;  // Inizializza il puntatore globale a NULL: non punta a nessun blocco di memoria
@@ -31,10 +23,6 @@ trajectory_calm* init_trajectory_struct()
 
   if (traj_record != NULL){ // aggiorno il valore del puntatore traj_record con un nuovo indirizzo di memoria che ora punta al blocco allocato.
 
-    // Inizializza i vettori delle posizioni assolute (int32_t)
-    //memset(traj_record->pos_x, 0, sizeof(traj_record->pos_x));
-    //memset(traj_record->pos_y, 0, sizeof(traj_record->pos_y));
-
     traj_record->current_index_record = 0;
     traj_record->current_size = 0;
     traj_record->current_direction = 1;
@@ -42,7 +30,6 @@ trajectory_calm* init_trajectory_struct()
     traj_record->total_distance = 0;
 
     traj_record->pointX = 0;
-    traj_record->current_index = 0;
 
     // Inizializza i vettori delle coordinate double (pos_x_double, pos_y_double)
     memset(traj_record->pos_x_double, 0, sizeof(traj_record->pos_x_double));
@@ -102,25 +89,17 @@ boolean record_trajectory(trajectory_calm* traj, int32_t x_to_be_recorded, int32
     traj->current_index_record += 1;
     traj->current_size += 1; // aggiorna la dimensione del vettore
 
-    // Incrementa il contatore delle iterazioni
-    Serial.print("iteration:");
-    Serial.print(currentIteration);
-    Serial.println(", ");
-    Serial.print("total_dist:");
-    Serial.print(traj->total_distance);
-    Serial.println(", ");
-
-    currentIteration += 1;
-
-    return true;
-
   } else {
-
-    current_state = OVERFLOW_TRAJ; // setLed(&ledGreen, !ledGreen.isOn); // Indicazione di overflow della traiettoria
-    return false;
-  
+    setLed(&ledGreen, !ledGreen.isOn); // Indicazione di overflow della traiettoria
   }
+
+  return true;
   
+}
+
+int32_t pow2(int32_t input)
+{
+  return input * input;
 }
 
 // ***********************************************************
@@ -134,6 +113,14 @@ void reinit_trajectory(trajectory_calm* traj)
   traj->total_distance = 0;
 }
 
+void cleanup_trajectory() {
+
+  if (traj_record != NULL) {
+    free(traj_record);  // Libera la memoria dinamica allocata per la traiettoria
+    traj_record = NULL; // Previene l'uso accidentale di un puntatore non valido
+  }
+
+}
 
 // ***********************************************************
 // *********** INTERPOLA LA TRAIETTORIA REGISTRATA ***********
@@ -148,49 +135,12 @@ boolean read_and_interp_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y
 
       //traj->pointX = traj->index_values[traj->current_size - 1];  // Inizia dall'ultimo nodo
       traj->current_direction = -1; // Direzione inversa
-      Serial.println("backward");
-
-      if(flag1 && !flag2){
-
-        startTime = micros();    // Prende il tempo iniziale in microsecondi
-        flag1 = false;
-
-      }else if(flag2){
-
-        endTime = micros();      // Prende il tempo finale in microsecondi
-
-        Serial.print("Tempo impiegato per leggere il vettore in forward: ");
-        Serial.print(endTime - startTime);
-        Serial.println("microS");
-
-        startTime = micros();    // aggiorna il valore di riferimento di startTime
-        
-        flag1 = false;
-        flag2 = false;
-
-      }
-      
                          
     } else if (traj->pointX <= 0){
 
       traj->pointX = 0;                       // Inizia dal primo nodo
       traj->current_direction = 1;            // Direzione normale
-      Serial.println("forward");           
-
-      if(!flag1){
-
-        endTime = micros();      // Prende il tempo finale in microsecondi
-
-        Serial.print("Tempo impiegato per leggere il vettore in backward: ");
-        Serial.print(endTime - startTime);
-        Serial.println("microS");
-
-        startTime = micros(); // aggiorna il valore di riferimento di startTime
-
-        flag1 = true;
-        flag2 = true;
-
-      }                 
+                                    
     }
 
     // Interpolazione Catmull-Rom per la coordinata X
@@ -214,18 +164,10 @@ boolean read_and_interp_trajectory(trajectory_calm* traj, int32_t* x, int32_t* y
     // Incrementa pointX per ottenere il prossimo valore alla chiamata successiva
     traj->pointX += (query_points_dist * traj->current_direction);
 
-    //Serial.print("pointX: ");
-    //Serial.println(traj->pointX);
-
   }
   else
   {
     return false; // Non ci sono abbastanza dati per procedere
   }
   return true;
-}
-
-int32_t pow2(int32_t input)
-{
-  return input * input;
 }

@@ -29,9 +29,8 @@ enum states {
   FREE_HAND,            // stato 2: Controllo manuale del manipolatore
   RECORDING,            // stato 3: Registrazione della traiettoria
   DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
+  ERROR,                // stato 5
+
 };       
 
 /**************************************************************************************************************************************/

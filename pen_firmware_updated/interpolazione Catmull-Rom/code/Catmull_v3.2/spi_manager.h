@@ -1,45 +1,44 @@
 /*
-* fsm.h
+* spi_manager.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: macchina a stati finiti del sistema
+*   Description: Settaggio protocollo di comunicazione SPI 
 */
 
-#ifndef FSM_H
-#define FSM_H
+#ifndef SPI_MANAGER_H
+#define SPI_MANAGER_H
 
-/************************************************************** Define macros *********************************************************/
+/************************************************************* Define Macros **********************************************************/
 /**************************************************************************************************************************************/
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
+#include "Arduino.h"
+#include <SPI.h>
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
+struct SPIManager
+{
 
-enum states {
-
-  INITIALIZATION,       // stato 0: fase di inizializzazione del calm
-  ZERO_POINT,           // stato 1: Setta la posizione (0,0) nel punto del workspace scelto dall'operatore
-  FREE_HAND,            // stato 2: Controllo manuale del manipolatore
-  RECORDING,            // stato 3: Registrazione della traiettoria
-  DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
-};       
+  int csPin;               // pin di selezione per lo slave
+  uint32_t spiSpeed;       // velocità della comunicazione SPI
+  SPISettings spiSettings;
+  
+};
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-// Dichiarazione esterna della variabile globale `current_state`
-extern enum states current_state; //  dico al compilatore che la variabile esiste da qualche altra parte (in un file .cpp), ma può essere utilizzata in tutti i file che includono questo header.
+void initSPIManager(SPIManager* spiManager, int csPin, uint32_t spiSpeed);
 /**************************************************************************************************************************************/
 
-#endif /* FSM_H */
+
+
+#endif /* SPI_MANAGER_H */

@@ -1,13 +1,13 @@
 /*
-* fsm.h
+* pin_map.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: macchina a stati finiti del sistema
+*   Description: Calm Board SAMD21 pins 
 */
 
-#ifndef FSM_H
-#define FSM_H
+#ifndef PIN_MAP_H
+#define PIN_MAP_H
 
 /************************************************************** Define macros *********************************************************/
 /**************************************************************************************************************************************/
@@ -16,30 +16,30 @@
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
+//#include <Arduino.h>
 
 /**************************************************************************************************************************************/
+
+#define LED_ON_OFF_SWITCH     13 // segnala l'avvio del progrogramma
+#define LED_USER_RED          14
+#define LED_USER_GREEN        42
+#define LED_OK                6 // segnala i movimenti lungo X
+#define LED_FAULT             7 // segnala i movimenti lungo Y
+#define BUZZER                32
+#define nENUSBV               8
+#define IPC_SPI_SCK           37
+#define IPC_SPI_CS            36
+#define IPC_SPI_MISO          34
+#define IPC_SPI_MOSI          35
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-
-enum states {
-
-  INITIALIZATION,       // stato 0: fase di inizializzazione del calm
-  ZERO_POINT,           // stato 1: Setta la posizione (0,0) nel punto del workspace scelto dall'operatore
-  FREE_HAND,            // stato 2: Controllo manuale del manipolatore
-  RECORDING,            // stato 3: Registrazione della traiettoria
-  DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
-};       
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-// Dichiarazione esterna della variabile globale `current_state`
-extern enum states current_state; //  dico al compilatore che la variabile esiste da qualche altra parte (in un file .cpp), ma può essere utilizzata in tutti i file che includono questo header.
+
 /**************************************************************************************************************************************/
 
-#endif /* FSM_H */
+#endif /* PIN_MAP_H */

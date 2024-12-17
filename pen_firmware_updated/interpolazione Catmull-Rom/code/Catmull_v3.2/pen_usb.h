@@ -1,13 +1,13 @@
 /*
-* fsm.h
+* pen_usb.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: macchina a stati finiti del sistema
+*   Description: Genstione di aspetti hardware specifici dell'interfaccia USB. Questo modulo si occupa di controllare fisicamente l'alimentazione USB e di monitorare se il modulo USB è pronto per l'uso
 */
 
-#ifndef FSM_H
-#define FSM_H
+#ifndef PEN_USB_H
+#define PEN_USB_H
 
 /************************************************************** Define macros *********************************************************/
 /**************************************************************************************************************************************/
@@ -16,30 +16,23 @@
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
-
+#include "Arduino.h"
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
-
-enum states {
-
-  INITIALIZATION,       // stato 0: fase di inizializzazione del calm
-  ZERO_POINT,           // stato 1: Setta la posizione (0,0) nel punto del workspace scelto dall'operatore
-  FREE_HAND,            // stato 2: Controllo manuale del manipolatore
-  RECORDING,            // stato 3: Registrazione della traiettoria
-  DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
-};       
+struct USBStruct
+{
+  int  usb_pin;
+  bool USBready;
+};
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-// Dichiarazione esterna della variabile globale `current_state`
-extern enum states current_state; //  dico al compilatore che la variabile esiste da qualche altra parte (in un file .cpp), ma può essere utilizzata in tutti i file che includono questo header.
+void initUSBStruct(USBStruct* usbStruct, int pin); // alloco staticamente la memoria riservata alla struttura (questa è una alternativa alla allocazione dinamica della memoria riservata alla struttura che in C si fa con malloc)
+void disableUSBStruct(USBStruct* usbStruct, int pin); 
 /**************************************************************************************************************************************/
 
-#endif /* FSM_H */
+#endif /* PEN_USB_H */

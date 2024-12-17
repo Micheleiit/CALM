@@ -1,45 +1,49 @@
 /*
-* fsm.h
+* led_blinker.h
 *
 * Created on: August, 2024
 *   Author: Michele Di Lucchio
-*   Description: macchina a stati finiti del sistema
+*   Description: Led pins Board SAMD21  
 */
 
-#ifndef FSM_H
-#define FSM_H
+#ifndef LED_H
+#define LED_H
 
 /************************************************************** Define macros *********************************************************/
+
 /**************************************************************************************************************************************/
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Include Files **********************************************************/
 /**************************************************************************************************************************************/
+#include <Arduino.h>
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Type Definitions *******************************************************/
 /**************************************************************************************************************************************/
 
-enum states {
+struct LedBlinkerStruct
+{
+  int pin;                // pin collegato al LED
+  unsigned long lastTime; // ultima volta che il LED è stato acceso/spento
+  bool isOn;              // stato attuale del LED
+};
 
-  INITIALIZATION,       // stato 0: fase di inizializzazione del calm
-  ZERO_POINT,           // stato 1: Setta la posizione (0,0) nel punto del workspace scelto dall'operatore
-  FREE_HAND,            // stato 2: Controllo manuale del manipolatore
-  RECORDING,            // stato 3: Registrazione della traiettoria
-  DRAW_RECORD,          // stato 4: Riproduzione di una traiettoria registrata
-  OVERFLOW_TRAJ,             // stato 5
-  ERROR,                // stato 6
-               
-};       
 
 /**************************************************************************************************************************************/
 
 /************************************************************* Function Declarations **************************************************/
 /**************************************************************************************************************************************/
-// Dichiarazione esterna della variabile globale `current_state`
-extern enum states current_state; //  dico al compilatore che la variabile esiste da qualche altra parte (in un file .cpp), ma può essere utilizzata in tutti i file che includono questo header.
+void initLedBlinkerStruct(LedBlinkerStruct* ledBlinkerStruct, int pin);
+void setLed(LedBlinkerStruct* ledBlinkerStruct, bool value);
+void ledBlink(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long period);
+//void enableLedBlink(LedBlinkerStruct* ledBlinkerStruct, unsigned long blinkPeriod, int blinkCount);
+//void doubleLedBlink(LedBlinkerStruct* ledBlinkerStruct1, LedBlinkerStruct* ledBlinkerStruct2, unsigned long blinkPeriod, int blinkCount);
+
+
+
 /**************************************************************************************************************************************/
 
-#endif /* FSM_H */
+#endif /* LED_H */

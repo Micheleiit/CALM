@@ -14,8 +14,6 @@
 #include "pen_button.h"
 #include "trajectory.h" 
 #include "pin_map.h"
-
-#include "data.h" // MOUSE DATA RECORDED
 /*********************************************************************************************************************************************************************************/
 
 /**********************************************************************************************************************************************************************************
@@ -30,8 +28,24 @@
 /*dichiarazione istanze delle strutture del sistema. Una istanza di una struttura è un OGGETTO specifico che utilizza il modello definito dalla struttura per contenere dati concreti.
 * Una volta creata un'istanza di una struttura, è possibile accedere ai suoi membri e manipolarli come qualsiasi altra variabile.*/
 
-SPIStruct penSpi; // oggetto per la comunicazione SPI master-sleave
+// ***************************
+// ******** PROTOCOLLI *******
+// ***************************
+SPIManager spiManager; // oggetto per la configurazione del protocollo SPI
+USBManager usbManager; // oggetto per la configurazione del protocollo USB
 
+// ***************************
+// ******** PENNINO **********
+// ***************************
+SPIStruct penSpi; // oggetto per la comunicazione SPI master-sleave
+USBStruct penUsb; // oggetto per l' abilitazione dell' host USB (pennino)
+
+ButtonStruct rightButton;
+ButtonStruct leftButton;
+ButtonStruct middleButton;
+
+// ***************************
+// ******** PCB **************
 // ***************************
 // creazione di più istanze di una struttura, ognuna delle quali contiene i propri dati separati
 LedBlinkerStruct ledOk; // led giallo frontale
@@ -40,6 +54,14 @@ LedBlinkerStruct ledOnOff; // led bottone
 LedBlinkerStruct ledRed; // led rosso sotto
 LedBlinkerStruct ledGreen; // led verde sotto
 
+// ***************************
+// ******** APPLICAZIONE *****
+// ***************************
+//AppStruct* myapp; // puntatore alla struttura AppStruct, rappresenta l'applicazione nel suo complesso raccogliendo tutte le strutture precedenti per gestire l'intero sistema
+
+// motion related variables
+uint16_t rx[4];
+uint16_t tx[4];
 
 float SCALING_MOUSE = 1.0;              // Inizializzo SCALING_MOUSE: SCALING_MOUSE > 1 amplifica i movimenti del mouse, mentre SCALING_MOUSE < 1, i movimenti del laser sarebbero più piccoli per lo stesso movimento del mouse 
 float* pScalingMouse = &SCALING_MOUSE;  // Definisco un puntatore a SCALING_MOUSE
@@ -54,26 +76,9 @@ double query_points_dist = 3.0 / 2.0;
 unsigned long startMicros = 0;
 unsigned long loopCounter = 0;*/
 
-
-// Variabili per il movimento simulato
-int simulatedXChange = 0;
-int simulatedYChange = 0;
-int currentIteration = 0;
-
-int size = sizeof(simulatedDataX) /sizeof(simulatedDataX[0]);
-int i = 0;
-
-// Variabili temporali
-unsigned long startTime;       // Variabile per memorizzare il tempo iniziale
-unsigned long endTime;         // Variabile per memorizzare il tempo finale
-bool flag1;
-bool flag2;
-
 /*********************************************************************************************************************************************************************************/
 
 void setup() {
-
-  current_state = RECORDING; 
 
   Serial.begin(115200);
 
@@ -81,8 +86,16 @@ void setup() {
   digitalWrite(BUZZER, LOW);
 
   /******************************************************************************* INIZIALIZZAZIONE MODULI ***********************************************************************/
+  initSPIManager(&spiManager, IPC_SPI_CS, SPI_SPEED); // inizializzazione del modulo SPI
+  initUSBManager(&usbManager); // inizializzazione del modulo USB
 
   initSPIStruct(&penSpi);
+  initUSBStruct(&penUsb, nENUSBV);
+
+  initButtonStruct(&rightButton);
+  initButtonStruct(&leftButton);
+  initButtonStruct(&middleButton);
+  
 
   initLedBlinkerStruct(&ledOk, LED_OK); // (led rosso frontale - serve per segnalere i movimenti lungo X)
   initLedBlinkerStruct(&ledFault, LED_FAULT); //  (led verde frontale - serve per segnalare i movimenti lungo Y)
@@ -104,73 +117,77 @@ void setup() {
 
   }
 
-  delay(40000); // necessario per aprire un terminale Putty
+  /*********************************************************************************************************************************************************************************/
 
+  testAndMonitorSPICommunication(&penSpi); // identificazione degli stati dello slave mandando un messaggio di test
+  
+  Serial.end();
 }
 
 void loop() {
+
+  /*if (loopCounter == 0) {
+    startMicros = micros();
+  }
+
+  loopCounter++;
+  Serial.print("loop: ");
+  Serial.println(loopCounter++);
+
+  if (micros() - startMicros >= 1000000) {  // Misura il tempo ogni 1 secondo (1.000.000 microsecondi)
+    Serial.print("Frequenza loop: ");
+    Serial.print(loopCounter);
+    Serial.println(" Hz");
+    loopCounter = 0;
+    startMicros = micros();
+  }*/
 
   checkCurrentState();
 
   //Serial.print("Stato attuale: ");
   //Serial.println(current_state); // Mostra lo stato corrente
+  //delay(2000);
 
-  if(current_state == RECORDING){
+  abort_sequence = false;
 
-    abort_sequence = false;
+  if(current_state != ERROR){ // Manipolatore pronto a processare gli input del pennino
+    
+    if(current_state == ZERO_POINT || current_state == FREE_HAND || current_state == RECORDING){
       
-    // Controlla se abbiamo raggiunto il numero totale di iterazioni
-    if (currentIteration < TRAJECTORY_MAX_SIZE && i < sizeof(simulatedDataX)/sizeof(simulatedDataX[0])) {
-
-      simulatedXChange = simulatedDataX[i];
-      simulatedYChange = simulatedDataY[i];
-
-      // Chiama la funzione mouseMoved con gli spostamenti simulati
-      mouseMoved(simulatedXChange, simulatedYChange);
+      /* Richiamo la funzione per eseguire il polling e gestire il dispositivo USB. In this case, 
+      the position is send only when there is an input from the mouse, not at 1kHz.*/
+      updateUSB(&usbManager);
       
-      // Incrementa il contatore delle iterazioni
-      //currentIteration++;
-      //Serial.print("iteration:");
-      //Serial.print(currentIteration);
 
-      Serial.print("i:");
-      Serial.print(i);
-      Serial.println(", ");
+    } else if(current_state == DRAW_RECORD){
 
-      i++;
+      /* In this case, the position is send at 1kHz ovvero ogni 1ms.*/
+      if (millis_prev + STREAMING_PERIOD_ms  <= millis()){
+        
+        millis_prev = millis();
 
-    } else {
+        updateUSB(&usbManager);
+        handlePenMotionAndSendSPI(&penSpi);
 
-      // Se la simulazione è finita, passa allo stato DRAW_RECORD
-      current_state = DRAW_RECORD;
+        if (abort_sequence){
+          current_state = FREE_HAND;
+        }
+      }
 
-      //Serial.println("Contenuto del vettore pos_x_double:");
-      //for (int i = 0; i < traj_record->current_index_record; i++) {
-        //Serial.print("pos_x_double[");
-        //Serial.print(i);
-        //Serial.print("]: ");
-        //Serial.println(traj_record->pos_x_double[i]);
-      //}
-      
-      traj_record->pointX = traj_record->index_values[traj_record->current_size - 1];
-      Serial.print("Initial_pointX: ");
-      Serial.println(traj_record->pointX);
-      //delay(1000);
-      flag1 = true;   // variabile temporale
-      flag2 = false;  // variabile temporale
-      
     }
 
-  }else if(current_state == DRAW_RECORD){
+  } else {                    // Manipolatore non pronto a processare gli input del pennino
 
-    /* In this case, the position is send at 1kHz ovvero ogni 1ms.*/
-    if (millis_prev + STREAMING_PERIOD_ms  <= millis()){
-      
-      millis_prev = millis();
+    while(true){
 
-      handlePenMotionAndSendSPI(&penSpi);
+      digitalWrite(BUZZER, HIGH);
+      delayMicroseconds(600);
+      digitalWrite(BUZZER, LOW);
+      delayMicroseconds(600);
+      //Serial.println("Manipolatore non risponde");
+      disableUSBStruct(&penUsb, nENUSBV);
 
     }
+
   }
-
 }
